@@ -1,8 +1,8 @@
 /*
- * threadsafe_stack类
+ * stack_ts类
  */
-#ifndef THREADSAFE_STACK_H
-#define THREADSAFE_STACK_H
+#ifndef STACK_TS_H
+#define STACK_TS_H
 
 #include <exception>
 #include <memory>
@@ -20,22 +20,22 @@ struct empty_stack : std::exception
 };
 
 template<typename T>
-class threadsafe_stack
+class stack_ts
 {
 private:
     std::stack<T> data;
     mutable std::mutex m;
 
 public:
-    threadsafe_stack() = default;
+    stack_ts() = default;
 
-    threadsafe_stack(const threadsafe_stack& other)
+    stack_ts(const stack_ts& other)
     {
         std::lock_guard<std::mutex> lock(other.m);
         data = other.data;
     }
 
-    threadsafe_stack& operator=(const threadsafe_stack&) = delete;
+    stack_ts& operator=(const stack_ts&) = delete;
 
     void push(T new_value)
     {
@@ -73,4 +73,4 @@ public:
 };
 
 
-#endif // !THREADSAFE_STACK_H
+#endif // !STACK_TS_H
