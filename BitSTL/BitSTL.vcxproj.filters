@@ -21,5 +21,8 @@
     <ClInclude Include="threadsafe\stack_ts.h">
       <Filter>头文件\threadsafe</Filter>
     </ClInclude>
+    <ClInclude Include="threadsafe\queue_ts.h">
+      <Filter>头文件\threadsafe</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

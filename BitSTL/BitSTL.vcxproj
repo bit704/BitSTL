@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="threadsafe\queue_ts.h" />
     <ClInclude Include="threadsafe\stack_ts.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
