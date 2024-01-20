@@ -11,7 +11,6 @@
 
 namespace bitstl
 {
-
     template<typename T>
     class queue_ts
     {

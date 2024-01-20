@@ -7,7 +7,6 @@ using namespace bitstl;
 
 namespace test_threadsafe
 {
-
     template<typename T>
     void push_and_pop(stack_ts<T>& test_stk)
     {
@@ -67,9 +66,10 @@ namespace test_threadsafe
 
     TEST(TestQueue, Test0)
     {
-        std::thread t1 = std::thread(data_preparation, 10);
-        std::thread t2 = std::thread(data_process, 10);
+        std::thread t1 = std::thread(data_process, 10);
+        std::thread t2 = std::thread(data_preparation, 10);
         t1.join();
-        t2.join();
+        t2.detach();
+        ASSERT_TRUE(test_que.empty());
     }
 }

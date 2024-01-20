@@ -16,6 +16,9 @@
     <Filter Include="头文件\threadsafe">
       <UniqueIdentifier>{5ffe8424-a39b-4a35-a69b-23794939e0d5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\parallel">
+      <UniqueIdentifier>{419d16ba-8a1b-47fe-8f64-542f8117203c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="threadsafe\stack_ts.h">
@@ -23,6 +26,9 @@
     </ClInclude>
     <ClInclude Include="threadsafe\queue_ts.h">
       <Filter>头文件\threadsafe</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\sort_paral.h">
+      <Filter>头文件\parallel</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
