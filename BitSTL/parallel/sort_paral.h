@@ -1,3 +1,6 @@
+/*
+ * 并发排序函数
+ */
 #ifndef SORT_PARAL_H
 #define SORT_PARAL_H
 
