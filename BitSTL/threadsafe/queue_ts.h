@@ -15,7 +15,7 @@ namespace bitstl
     class queue_ts
     {
     private:
-        std::queue<T> data;
+        std::queue<std::shared_ptr<T>> data;
         mutable std::mutex mtx;
         std::condition_variable cond;
 
@@ -25,15 +25,17 @@ namespace bitstl
         queue_ts(const queue_ts& other)
         {
             std::lock_guard<std::mutex> lock(other.mtx);
-            data = other.data;
+            data = std::move(other.data);
         }
 
         queue_ts& operator=(const queue_ts&) = delete;
 
         void push(T new_value)
         {
+            // new_value_p构造放在临界区外，缩短持锁时长
+            auto new_value_p(std::make_shared<T>(std::move(new_value)));
             std::lock_guard<std::mutex> lock(mtx);
-            data.push(new_value);
+            data.push(new_value_p);
             cond.notify_one();
         }
 
@@ -41,7 +43,7 @@ namespace bitstl
         {
             std::unique_lock<std::mutex> lock(mtx);
             cond.wait(lock, [this] { return !data.empty(); });
-            value = data.front();
+            value = std::move(*data.front());
             data.pop();
         }
 
@@ -49,7 +51,8 @@ namespace bitstl
         {
             std::unique_lock<std::mutex> lock(mtx);
             cond.wait(lock, [] { return !data.empty(); });
-            auto res = std::make_shared<T>(data.front());
+            // data中储存shared_ptr，可直接拷贝赋值。否则需要构造，可能在此抛出异常（如内存不足）。
+            auto res = data.front();
             data.pop();
             return res;
         }
@@ -59,7 +62,7 @@ namespace bitstl
             std::lock_guard<std::mutex> lock(mtx);
             if (data.empty)
                 return false;
-            value = data.front();
+            value = std::move(*data.front());
             data.pop();
             return true;
         }

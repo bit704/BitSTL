@@ -15,7 +15,7 @@ namespace bitstl
     class stack_ts
     {
     private:
-        std::stack<T> data;
+        std::stack<std::shared_ptr<T>> data;
         mutable std::mutex mtx;
 
     public:
@@ -24,15 +24,16 @@ namespace bitstl
         stack_ts(const stack_ts& other)
         {
             std::lock_guard<std::mutex> lock(other.mtx);
-            data = other.data;
+            data = std::move(other.data);
         }
 
         stack_ts& operator=(const stack_ts&) = delete;
 
         void push(T new_value)
         {
+            auto new_value_p(std::make_shared<T>(std::move(new_value)));
             std::lock_guard<std::mutex> lock(mtx);
-            data.push(std::move(new_value));
+            data.push(new_value_p);
         }
 
         // 返回智能指针
@@ -41,7 +42,7 @@ namespace bitstl
             std::lock_guard<std::mutex> lock(mtx);
             if (data.empty())
                 return std::shared_ptr<T>();
-            auto res = std::make_shared<T>(data.top());
+            auto res = data.top();
             data.pop();
             return res;
         }
@@ -52,7 +53,7 @@ namespace bitstl
             std::lock_guard<std::mutex> lock(mtx);
             if (data.empty())
                 return false;
-            value = data.top();
+            value = std::move(*data.top());
             return true;
         }
 
