@@ -30,5 +30,13 @@
     <ClInclude Include="parallel\sort_paral.h">
       <Filter>头文件\parallel</Filter>
     </ClInclude>
+    <ClInclude Include="threadsafe\unordered_map_ts.h">
+      <Filter>头文件\threadsafe</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stub.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
