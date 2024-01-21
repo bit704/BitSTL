@@ -6,10 +6,9 @@ namespace test_paral
     TEST(TestSort, Test0)
     {
         std::list<int> test_list;
-        for (int i = int(1e2); i >= 0; --i)
-        {
-            test_list.push_back(i);
-        }
+
+        test_list.assign(500, 0);
+        std::iota(test_list.begin(), test_list.end(), 1);
 
         auto start = steady_clock::now();
 

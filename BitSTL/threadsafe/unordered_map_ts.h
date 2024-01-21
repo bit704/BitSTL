@@ -1,8 +1,8 @@
 /*
  * unordered_map_ts类
  */
-#ifndef UNORDERED_MAP_H
-#define UNORDERED_MAP_H
+#ifndef UNORDERED_MAP_TS_H
+#define UNORDERED_MAP_TS_H
 
 #include <memory>
 #include <mutex>
@@ -140,4 +140,4 @@ namespace bitstl
         }
     };
 }
-#endif // !UNORDERED_MAP_H
+#endif // !UNORDERED_MAP_TS_H

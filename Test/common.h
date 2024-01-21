@@ -2,22 +2,25 @@
 #define COMMON_H
 
 #include <syncstream>
+#include <random>
+#include <iterator>
+#include <cmath>
+#include <numeric>
 
-#include "../BitSTL/parallel/sort_paral.h"
-
-#include "../BitSTL/threadsafe/stack_ts.h"
-#include "../BitSTL/threadsafe/queue_ts.h"
-#include "../BitSTL/threadsafe/unordered_map_ts.h"
+#include "parallel/sort_paral.h"
+#include "threadsafe/stack_ts.h"
+#include "threadsafe/queue_ts.h"
+#include "threadsafe/unordered_map_ts.h"
 
 #if 1
 #define DEBUGGING
 #endif
 
 #ifdef DEBUGGING
-#define DEBUG std::osyncstream(std::cout)
+#define DEBUG (std::osyncstream(std::cout) << "[DEBUG]")
 #endif
 
-#define LOG (std::cout)
+#define LOG (std::cout << "[LOG]")
 
 using namespace bitstl;
 
