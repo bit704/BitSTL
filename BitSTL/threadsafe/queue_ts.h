@@ -21,16 +21,16 @@ namespace bitstl
             std::unique_ptr<node> next;
         };
 
-        mutable std::mutex head_mtx;
-        mutable std::mutex tail_mtx;
+        mutable std::mutex head_mtx_;
+        mutable std::mutex tail_mtx_;
 
-        std::unique_ptr<node> head;
-        node* tail;
+        std::unique_ptr<node> head_;
+        node* tail_;
         
-        std::condition_variable cond;
+        std::condition_variable cond_;
 
     public:
-        queue_ts() : head(new node), tail(head.get()) {}
+        queue_ts() : head_(new node), tail_(head_.get()) {}
 
         queue_ts(const queue_ts& other) = delete;
         queue_ts& operator=(const queue_ts&) = delete;
@@ -42,13 +42,13 @@ namespace bitstl
             std::unique_ptr<node> p(new node);
             // 临界区
             {
-                std::lock_guard<std::mutex> tail_lock(tail_mtx);
-                tail->data = new_value_p;
+                std::lock_guard<std::mutex> tail_lock(tail_mtx_);
+                tail_->data = new_value_p;
                 node* const new_tail = p.get();
-                tail->next = std::move(p);
-                tail = new_tail;
+                tail_->next = std::move(p);
+                tail_ = new_tail;
             }
-            cond.notify_one();
+            cond_.notify_one();
         }
 
         void wait_and_pop(T& value)
@@ -76,28 +76,28 @@ namespace bitstl
 
         bool empty()
         {
-            std::lock_guard<std::mutex> head_lock(head_mtx);
-            return head.get() == get_tail();
+            std::lock_guard<std::mutex> head_lock(head_mtx_);
+            return head_.get() == get_tail();
         }
 
     private:
         node* get_tail()
         {
-            std::lock_guard<std::mutex> tail_lock(tail_mtx);
-            return tail;
+            std::lock_guard<std::mutex> tail_lock(tail_mtx_);
+            return tail_;
         }
 
         std::unique_ptr<node> pop_head()
         {
-            std::unique_ptr<node> old_head = std::move(head);
-            head = std::move(old_head->next);
+            std::unique_ptr<node> old_head = std::move(head_);
+            head_ = std::move(old_head->next);
             return old_head;
         }
 
         std::unique_lock<std::mutex> wait_for_data()
         {
-            std::unique_lock<std::mutex> head_lock(head_mtx);
-            cond.wait(head_lock, [&] {return head.get() != get_tail(); });
+            std::unique_lock<std::mutex> head_lock(head_mtx_);
+            cond_.wait(head_lock, [&] {return head_.get() != get_tail(); });
             return std::move(head_lock);
         }
 
@@ -110,14 +110,14 @@ namespace bitstl
         std::unique_ptr<node> wait_pop_head(T& value)
         {
             std::unique_lock<std::mutex> head_lock(wait_for_data());
-            value = std::move(*head->data);
+            value = std::move(*head_->data);
             return pop_head();
         }
 
         std::unique_ptr<node> try_pop_head()
         {
-            std::unique_lock<std::mutex> head_lock(head_mtx);
-            if (head.get() == get_tail())
+            std::unique_lock<std::mutex> head_lock(head_mtx_);
+            if (head_.get() == get_tail())
             {
                 return std::unique_ptr<node>();
             }
@@ -126,12 +126,12 @@ namespace bitstl
 
         std::unique_ptr<node> try_pop_head(T& value)
         {
-            std::unique_lock<std::mutex> head_lock(head_mtx);
-            if (head.get() == get_tail())
+            std::unique_lock<std::mutex> head_lock(head_mtx_);
+            if (head_.get() == get_tail())
             {
                 return std::unique_ptr<node>();
             }
-            value = std::move(*head->data);
+            value = std::move(*head_->data);
             return pop_head();
         }
     };

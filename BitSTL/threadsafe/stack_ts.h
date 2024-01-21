@@ -15,16 +15,16 @@ namespace bitstl
     class stack_ts
     {
     private:
-        std::stack<std::shared_ptr<T>> data;
-        mutable std::mutex mtx;
+        std::stack<std::shared_ptr<T>> data_;
+        mutable std::mutex mtx_;
 
     public:
         stack_ts() = default;
 
         stack_ts(const stack_ts& other)
         {
-            std::lock_guard<std::mutex> lock(other.mtx);
-            data = std::move(other.data);
+            std::lock_guard<std::mutex> lock(other.mtx_);
+            data_ = std::move(other.data_);
         }
 
         stack_ts& operator=(const stack_ts&) = delete;
@@ -32,36 +32,36 @@ namespace bitstl
         void push(T new_value)
         {
             auto new_value_p(std::make_shared<T>(std::move(new_value)));
-            std::lock_guard<std::mutex> lock(mtx);
-            data.push(new_value_p);
+            std::lock_guard<std::mutex> lock(mtx_);
+            data_.push(new_value_p);
         }
 
         // 返回智能指针
         std::shared_ptr<T> pop()
         {
-            std::lock_guard<std::mutex> lock(mtx);
-            if (data.empty())
+            std::lock_guard<std::mutex> lock(mtx_);
+            if (data_.empty())
                 return std::shared_ptr<T>();
-            auto res = data.top();
-            data.pop();
+            auto res = data_.top();
+            data_.pop();
             return res;
         }
 
         // 返回引用
         bool pop(T& value)
         {
-            std::lock_guard<std::mutex> lock(mtx);
-            if (data.empty())
+            std::lock_guard<std::mutex> lock(mtx_);
+            if (data_.empty())
                 return false;
-            value = std::move(*data.top());
+            value = std::move(*data_.top());
             return true;
         }
 
         bool empty()
             const
         {
-            std::lock_guard<std::mutex> lock(mtx);
-            return data.empty();
+            std::lock_guard<std::mutex> lock(mtx_);
+            return data_.empty();
         }
     };
 
