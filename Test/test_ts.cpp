@@ -129,4 +129,38 @@ namespace test_threadsafe
 #endif
         ASSERT_EQ(remove_count, actual_remove_count);
     }
+
+    TEST(TestList, Test0)
+    {
+        list_ts<int> test_list;
+        int num = 20;
+
+        for (int i = 0; i < num; ++i)
+        {
+            test_list.push_front(i);
+        }
+
+        std::thread t1 = std::thread([&]
+            {
+                while (true)
+                {
+                    std::this_thread::sleep_for(milliseconds(50));
+                    test_list.remove_if([](int x) { return x % 2 == 0; });
+                }
+                    
+            });
+        t1.detach();
+        
+        std::thread t2 = std::thread([&]
+            {
+                while (!test_list.empty())
+                {
+                    std::this_thread::sleep_for(milliseconds(100));
+                    test_list.for_each([](int& x) { x *= 2; });
+                }
+            });
+        t2.join();
+
+        ASSERT_TRUE(test_list.empty());
+    }
 }

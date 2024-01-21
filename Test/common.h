@@ -11,6 +11,7 @@
 #include "threadsafe/stack_ts.h"
 #include "threadsafe/queue_ts.h"
 #include "threadsafe/unordered_map_ts.h"
+#include "threadsafe/list_ts.h"
 
 #if 1
 #define DEBUGGING
