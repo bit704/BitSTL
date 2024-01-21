@@ -15,16 +15,16 @@ namespace test_threadsafe
             {
                 test_stk.push(i);
 #ifdef DEBUGGING
-                DEBUG << "thread(" << id << ")";
-                DEBUG << "push:" << i << std::endl;
+                DEBUG_ST << "thread(" << id << ")";
+                DEBUG_ST << "push:" << i << std::endl;
 #endif
             }
             for (int i = 0; i < num; ++i)
             {
                 auto p = test_stk.pop();
 #ifdef DEBUGGING
-                DEBUG << "thread(" << id << ")";
-                DEBUG << "pop:" << *p << std::endl;
+                DEBUG_ST << "thread(" << id << ")";
+                DEBUG_ST << "pop:" << *p << std::endl;
 #endif
             }
             return;
@@ -62,7 +62,7 @@ namespace test_threadsafe
                     int t;
                     test_que.wait_and_pop(t);
 #ifdef DEBUGGING
-                    DEBUG << "process " << t << std::endl;
+                    DEBUG_ST << "process " << t << std::endl;
 #endif
                     ++count;
                 }
@@ -109,7 +109,7 @@ namespace test_threadsafe
                     {
                         remove_count += 1;
 #ifdef DEBUGGING
-                        DEBUG << "remove " << index[i] << std::endl;
+                        DEBUG_ST << "remove " << index[i] << std::endl;
 #endif
                     }
                 }
@@ -125,7 +125,7 @@ namespace test_threadsafe
         }
 
 #ifdef DEBUGGING
-        DEBUG << "remove_count: " << remove_count << std::endl;
+        DEBUG_ST << "remove_count: " << remove_count << std::endl;
 #endif
         ASSERT_EQ(remove_count, actual_remove_count);
     }
