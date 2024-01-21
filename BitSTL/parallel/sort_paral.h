@@ -9,14 +9,6 @@
 
 namespace bitstl
 {
-    std::ostream& operator<<(std::ostream& ostr, const std::list<int>& list)
-    {
-        for (auto& i : list)
-            ostr << ' ' << i;
-
-        return ostr;
-    }
-
     template<typename T, typename Comp>
     std::list<T> quick_sort_paral(std::list<T> input, Comp comp)
     {

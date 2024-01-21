@@ -1,12 +1,5 @@
 #include "pch.h"
-
-#include "../BitSTL/parallel/sort_paral.h"
-
-using namespace bitstl;
-
-using std::chrono::steady_clock;
-using std::chrono::duration_cast;
-using std::chrono::milliseconds;
+#include "common.h"
 
 namespace test_paral
 {
@@ -28,6 +21,8 @@ namespace test_paral
         auto end = steady_clock::now();
 
         ASSERT_TRUE(std::is_sorted(res.begin(), res.end(), comp));
-        std::cout << duration_cast<milliseconds>(end - start).count() << std::endl;
+
+        LOG << duration_cast<milliseconds>(end - start).count() << "(milliseconds)" << std::endl;
     }
 }
+
