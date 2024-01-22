@@ -1,5 +1,6 @@
 /*
  * list_ts类
+ * 单向链表
  */
 #ifndef LIST_TS_H
 #define LIST_TS_H

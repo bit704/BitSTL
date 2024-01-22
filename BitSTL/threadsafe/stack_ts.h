@@ -1,5 +1,6 @@
 /*
  * stack_ts类
+ * 栈
  */
 #ifndef STACK_TS_H
 #define STACK_TS_H

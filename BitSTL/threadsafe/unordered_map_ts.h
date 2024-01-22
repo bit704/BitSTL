@@ -1,5 +1,6 @@
 /*
  * unordered_map_ts类
+ * 由多个bucket组成，在bucket一级加锁
  */
 #ifndef UNORDERED_MAP_TS_H
 #define UNORDERED_MAP_TS_H
@@ -17,14 +18,12 @@ namespace bitstl
     class unordered_map_ts
     {
     private:
-        // unordered_map_ts由多个bucket组成,bucket数目为质数最佳。
         class bucket_type;
-        std::vector<std::unique_ptr<bucket_type>> buckets_;
+        std::vector<std::unique_ptr<bucket_type>> buckets_; // bucket数目为质数最佳。
 
         Hash hasher_;
 
     private:
-        // 仅需在bucket一级加锁
         bucket_type& get_bucket(const K& key)
             const
         {

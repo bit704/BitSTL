@@ -1,5 +1,5 @@
 /*
- * 并发排序函数
+ * 并发排序函数库
  */
 #ifndef SORT_PARAL_H
 #define SORT_PARAL_H
@@ -9,6 +9,7 @@
 
 namespace bitstl
 {
+    // TODO 使用线程池
     template<typename T, typename Comp>
     std::list<T> quick_sort_paral(std::list<T> input, Comp comp)
     {

@@ -1,5 +1,6 @@
 /*
  * queue_ts类
+ * 队列
  */
 #ifndef QUEUE_TS_H
 #define QUEUE_TS_H
