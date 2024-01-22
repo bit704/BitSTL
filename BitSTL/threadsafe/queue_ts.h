@@ -5,7 +5,6 @@
 #ifndef QUEUE_TS_H
 #define QUEUE_TS_H
 
-#include <queue>
 #include <memory>
 #include <mutex>
 #include <condition_variable>

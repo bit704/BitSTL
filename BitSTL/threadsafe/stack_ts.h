@@ -1,14 +1,12 @@
 /*
  * stack_ts类
- * 栈
+ * 无锁栈
  */
 #ifndef STACK_TS_H
 #define STACK_TS_H
 
-#include <exception>
+#include <atomic>
 #include <memory>
-#include <mutex>
-#include <stack>
 
 namespace bitstl
 {
@@ -16,55 +14,100 @@ namespace bitstl
     class stack_ts
     {
     private:
-        std::stack<std::shared_ptr<T>> data_;
-        mutable std::mutex mtx_;
+        struct node
+        {
+            std::shared_ptr<T> data;
+            node* next;
+            node(const T& _data) : data(std::make_shared<T>(_data)) {}
+        };
+        std::atomic<node*> head_;
 
     public:
-        stack_ts() = default;
-
-        stack_ts(const stack_ts& other)
+        void push(const T& new_value)
         {
-            std::lock_guard<std::mutex> lock(other.mtx_);
-            data_ = std::move(other.data_);
+            node* const new_node = new node(new_value);
+            new_node->next = head_.load();
+            // 当head未被其它指针改动过时更新head_
+            while (!head_.compare_exchange_weak(new_node->next, new_node));
         }
 
-        stack_ts& operator=(const stack_ts&) = delete;
-
-        void push(T new_value)
-        {
-            auto new_value_p(std::make_shared<T>(std::move(new_value)));
-            std::lock_guard<std::mutex> lock(mtx_);
-            data_.push(new_value_p);
-        }
-
-        // 返回智能指针
         std::shared_ptr<T> pop()
         {
-            std::lock_guard<std::mutex> lock(mtx_);
-            if (data_.empty())
-                return std::shared_ptr<T>();
-            auto res = data_.top();
-            data_.pop();
+            ++threads_popping_;
+            node* old_head = head_.load();
+            // 当head未被其它指针改动过时更新head_
+            while (old_head && !head_.compare_exchange_weak(old_head, old_head->next));
+            std::shared_ptr<T> res;
+            if (old_head)
+                res.swap(old_head->data);
+            try_delete(old_head);
             return res;
-        }
-
-        // 返回引用
-        bool pop(T& value)
-        {
-            std::lock_guard<std::mutex> lock(mtx_);
-            if (data_.empty())
-                return false;
-            value = std::move(*data_.top());
-            return true;
         }
 
         bool empty()
             const
         {
-            std::lock_guard<std::mutex> lock(mtx_);
-            return data_.empty();
+            return head_.load()->data == nullptr;
+        }
+
+    private:
+        std::atomic<unsigned int> threads_popping_; // 当前使用pop函数的线程数量
+        std::atomic<node*> delete_candidate_;
+
+        void try_delete(node * old_head)
+        {
+            std::cout << "{{delete}}" << std::endl;
+            if (threads_popping_ == 1)
+            {
+                node* candidates = delete_candidate_.exchange(nullptr);
+                if (!(--threads_popping_)) // threads_in_pop为0，无线程调用pop
+                {
+                    delete_nodes(candidates);
+                }
+                else if (candidates)
+                {
+                    add_candidates(candidates);
+                }
+                delete old_head; // 先尝试删除delete_candidate_，再删除old_head
+            }
+            else
+            {
+                add_candidate(old_head);
+                --threads_popping_;
+            }
+        }
+
+        static void delete_nodes(node* ns)
+        {
+            while (ns)
+            {
+                node* next = ns->next;
+                delete ns;
+                ns = next;
+            }
+        }
+
+        void add_candidate(node* n)
+        {
+            add_candidates(n, n);
+        }
+
+        void add_candidates(node* first, node* last)
+        {
+            last->next = delete_candidate_;
+            while (!delete_candidate_.compare_exchange_weak(last->next, first));
+        }
+
+        void add_candidates(node* ns)
+        {
+            node* last = ns;
+            // 将last移动到链表末端
+            while (node* const next = last->next) 
+            {
+                last = next;
+            }
+            add_candidates(ns, last);
         }
     };
-
 }
 #endif // !STACK_TS_H
