@@ -36,6 +36,9 @@
     <ClInclude Include="threadsafe\list_ts.h">
       <Filter>头文件\threadsafe</Filter>
     </ClInclude>
+    <ClInclude Include="parallel\calc_paral.h">
+      <Filter>头文件\parallel</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stub.cpp">

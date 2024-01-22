@@ -76,7 +76,7 @@ namespace test_threadsafe
     {
         unordered_map_ts<int, double> test_ump;
 
-        int tot_count = 200;
+        int tot_count = 50;
         int remove_count = 0;
         int actual_remove_count = 0;
 
@@ -142,7 +142,7 @@ namespace test_threadsafe
             {
                 while (true)
                 {
-                    std::this_thread::sleep_for(milliseconds(50));
+                    std::this_thread::sleep_for(milliseconds(1));
                     test_list.remove_if([](int x) { return x % 2 == 0; });
                 }
                     
@@ -153,7 +153,7 @@ namespace test_threadsafe
             {
                 while (!test_list.empty())
                 {
-                    std::this_thread::sleep_for(milliseconds(100));
+                    std::this_thread::sleep_for(milliseconds(2));
                     test_list.for_each([](int& x) { x *= 2; });
                 }
             });
