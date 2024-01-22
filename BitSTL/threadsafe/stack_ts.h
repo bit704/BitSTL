@@ -47,16 +47,17 @@ namespace bitstl
         bool empty()
             const
         {
-            return head_.load()->data == nullptr;
+            return head_.load() == nullptr;
         }
 
     private:
         std::atomic<unsigned int> threads_popping_; // 当前使用pop函数的线程数量
-        std::atomic<node*> delete_candidate_;
+        std::atomic<node*> delete_candidate_; 
 
         void try_delete(node * old_head)
         {
-            std::cout << "{{delete}}" << std::endl;
+            // 高并发场景下threads_popping_一直不为1，导致delete_candidate_无限增加，得不到释放
+            // 实际上没有线程访问的node即可释放，使用hazard pointer、引用计数能够实现
             if (threads_popping_ == 1)
             {
                 node* candidates = delete_candidate_.exchange(nullptr);

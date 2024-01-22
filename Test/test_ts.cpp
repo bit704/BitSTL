@@ -15,16 +15,14 @@ namespace test_threadsafe
             {
                 test_stk.push(i);
 #ifdef DEBUGGING
-                DEBUG_ST << "thread(" << id << ")";
-                DEBUG_ST << "push:" << i << std::endl;
+                DEBUG_ST << "thread(" << id << ")" << " push:" << i << std::endl;
 #endif
             }
             for (int i = 0; i < num; ++i)
             {
                 auto p = test_stk.pop();
 #ifdef DEBUGGING
-                DEBUG_ST << "thread(" << id << ")";
-                DEBUG_ST << "pop:" << *p << std::endl;
+                DEBUG_ST << "thread(" << id << ")" << " pop:" << *p << std::endl;
 #endif
             }
             return;
