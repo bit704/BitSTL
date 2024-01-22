@@ -1,12 +1,7 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#include <syncstream>
-#include <random>
-#include <iterator>
-#include <cmath>
-#include <numeric>
-
+#include "pch.h"
 #include "parallel/sort_paral.h"
 #include "threadsafe/stack_ts.h"
 #include "threadsafe/queue_ts.h"
