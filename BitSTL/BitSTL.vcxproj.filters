@@ -27,16 +27,13 @@
     <ClInclude Include="threadsafe\queue_ts.h">
       <Filter>头文件\threadsafe</Filter>
     </ClInclude>
-    <ClInclude Include="parallel\sort_paral.h">
-      <Filter>头文件\parallel</Filter>
-    </ClInclude>
     <ClInclude Include="threadsafe\unordered_map_ts.h">
       <Filter>头文件\threadsafe</Filter>
     </ClInclude>
     <ClInclude Include="threadsafe\list_ts.h">
       <Filter>头文件\threadsafe</Filter>
     </ClInclude>
-    <ClInclude Include="parallel\calc_paral.h">
+    <ClInclude Include="parallel\algo_paral.h">
       <Filter>头文件\parallel</Filter>
     </ClInclude>
   </ItemGroup>

@@ -2,8 +2,7 @@
 #define COMMON_H
 
 #include "pch.h"
-#include "parallel/sort_paral.h"
-#include "parallel/calc_paral.h"
+#include "parallel/algo_paral.h"
 #include "threadsafe/stack_ts.h"
 #include "threadsafe/queue_ts.h"
 #include "threadsafe/unordered_map_ts.h"

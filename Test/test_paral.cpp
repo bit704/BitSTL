@@ -1,9 +1,24 @@
 #include "pch.h"
 #include "common.h"
 
-namespace test_paral
+namespace test_parallel
 {
-    TEST(TestSort, TestQuick_sort)
+    TEST(Tes_for_each_paral, Test0)
+    {
+        std::vector<double> v1(int(1e6), 5);
+        std::vector<double> v2(int(1e6), 5);
+
+        auto op = [](double& x) {x = std::sqrt(x); };
+        BENCHMARK(for_each_paral(v1.begin(), v1.end(), op);,
+            for_each(v2.begin(), v2.end(), op);)
+
+        std::cout << v1[2] << std::endl;
+        std::cout << v2[2] << std::endl;
+        ASSERT_EQ(v1, v2);
+
+    }
+
+    TEST(Test_quick_sort_paral, Test0)
     {
         std::vector<int> v(int(1e4), 0);
         std::iota(v.begin(), v.end(), 1);
@@ -22,7 +37,7 @@ namespace test_paral
         ASSERT_TRUE(std::is_sorted(res.begin(), res.end(), comp));
     }
 
-    TEST(TestCalc, TestAccumulate)
+    TEST(Test_accumulate_paral, Test0)
     {
         std::vector<double> test_vec(int(1e5), 2.2);
 

@@ -14,7 +14,7 @@ C++标准模板库。
 
 `threadsafe/list_ts.h`：线程安全的单向链表。在节点一级加锁。
 
-`parallel/sort_paral.h`：并发排序函数库。
+`parallel/algo_paral.h`：并发算法库。
 
 参考资料：
 

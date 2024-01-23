@@ -1,17 +1,111 @@
 /*
- * 并发排序函数库
+ * 并发算法库
  */
-#ifndef SORT_PARAL_H
-#define SORT_PARAL_H
+#ifndef ALGO_PARAL_H
+#define ALGO_PARAL_H
 
-#include <list>
-#include <future>
 #include <numeric>
+#include <vector>
+#include <thread>
+#include <future>
 
 #include "threadsafe/stack_ts.h"
 
 namespace bitstl
 {
+    using ulong = unsigned long;
+
+    // 划分子任务
+    static void get_partition(const ulong data_length, ulong& thread_num, ulong& data_per_thread)
+    {
+        assert(data_length > 0);
+        const ulong min_per_thread = 20ul;
+        const ulong max_threads = (data_length + min_per_thread - 1) / min_per_thread;
+        const ulong hardware_threads = std::thread::hardware_concurrency();
+        thread_num = std::min(hardware_threads != 0 ? hardware_threads : 2, max_threads);
+        data_per_thread = data_length / thread_num;
+    }
+
+    template<typename Iterator, typename Func>
+    void for_each_paral(Iterator first, Iterator last, Func f)
+    {
+        ulong const data_length = std::distance(first, last);
+        if (!data_length)
+            return;
+
+        ulong thread_num = 0, data_per_thread = 0;
+        get_partition(data_length, thread_num, data_per_thread);
+
+        std::vector<std::future<void>> futures(thread_num - 1);
+        std::vector<std::thread> threads(thread_num - 1);
+
+        Iterator start = first;
+        for (ulong i = 0; i < (thread_num - 1); ++i)
+        {
+            Iterator end = start;
+            std::advance(end, data_per_thread);
+            std::packaged_task<void(void)> task([=]()
+            {
+                std::for_each(start, end, f);
+            });
+            futures[i] = task.get_future();
+            threads[i] = std::thread(std::move(task));
+            start = end;
+        }
+        std::for_each(start, last, f);
+        for (ulong i = 0; i < (thread_num - 1); ++i)
+        {
+            futures[i].get();
+            threads[i].join();
+        }
+            
+    }
+
+    template<typename Iterator, typename T>
+    struct accumulate_once
+    {
+        T operator()(Iterator first, Iterator last)
+        {
+            return std::accumulate(first, last, T());
+        }         
+    };
+
+    template<typename Iterator, typename T>
+    T accumulate_paral(Iterator first, Iterator last, T init)
+    {
+        const ulong data_length = std::distance(first, last);
+        if (!data_length)
+            return init;
+
+        ulong thread_num = 0, data_per_thread = 0;
+        get_partition(data_length, thread_num, data_per_thread);
+
+        std::vector<std::future<T>> futures(thread_num - 1);
+        std::vector<std::thread> threads(thread_num - 1);
+
+        Iterator start = first;
+        for (ulong i = 0; i < (thread_num - 1); ++i)
+        {
+            Iterator end = start;
+            std::advance(end, data_per_thread);
+            // 使用{}初始化而不是()初始化避免编译器将其作为函数声明
+            std::packaged_task<T(Iterator, Iterator)> task{ accumulate_once<Iterator, T>() };
+            futures[i] = task.get_future();
+            threads[i] = std::thread(std::move(task), start, end);
+            start = end;
+        }
+        
+        T res = init + accumulate_once<Iterator, T>()(start, last);
+
+        for (auto& entry : threads)
+            entry.join();
+
+        for (auto& future : futures)
+            res += future.get();
+
+        return res;
+    }
+
     template<typename T, typename Comp>
     struct sorter;
 
@@ -20,7 +114,7 @@ namespace bitstl
     {
         if (input.empty())
             return input;
-        static sorter<T,Comp> s;
+        static sorter<T, Comp> s;
         return s.sort(input);
     }
 
@@ -75,7 +169,7 @@ namespace bitstl
                 threads.push_back(std::thread(&sorter<T, Comp>::thread_work, this));
             return do_sort(chunk_data);
         }
-        
+
         std::list<T> do_sort(std::list<T>& chunk_data)
         {
             if (chunk_data.empty() || chunk_data.size() == 1)
@@ -94,15 +188,15 @@ namespace bitstl
             // 取第一个值作为划分轴
             result.splice(result.begin(), chunk_data, chunk_data.begin());
             const T& partition_val = *result.begin();
-            typename std::list<T>::iterator pivot = 
-                std::partition(chunk_data.begin(), chunk_data.end(), 
+            typename std::list<T>::iterator pivot =
+                std::partition(chunk_data.begin(), chunk_data.end(),
                     [&](const T& v) {return Comp()(v, partition_val); });
-            
+
             chunk_to_sort new_lower_chunk;
             new_lower_chunk.data.splice(new_lower_chunk.data.end(), chunk_data, chunk_data.begin(), pivot);
-            
+
             std::future<std::list<T>> new_lower = new_lower_chunk.promise.get_future();
-            
+
             chunks.push(std::move(new_lower_chunk));
 
             // 当前线程对后半排序
@@ -119,4 +213,7 @@ namespace bitstl
         }
     };
 }
-#endif // !SORT_PARAL_H
+
+#endif // !ALGO_PARAL_H
+
+

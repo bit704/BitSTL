@@ -19,8 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="parallel\calc_paral.h" />
-    <ClInclude Include="parallel\sort_paral.h" />
+    <ClInclude Include="parallel\algo_paral.h" />
     <ClInclude Include="threadsafe\list_ts.h" />
     <ClInclude Include="threadsafe\queue_ts.h" />
     <ClInclude Include="threadsafe\stack_ts.h" />

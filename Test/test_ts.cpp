@@ -3,7 +3,7 @@
 
 namespace test_threadsafe
 {
-    TEST(TestStack, Test0)
+    TEST(Test_stack_ts, Test0)
     {
         stack_ts<int> test_stk;
         int num = 10;
@@ -41,7 +41,7 @@ namespace test_threadsafe
         ASSERT_TRUE(test_stk.empty());
     }
 
-    TEST(TestQueue, Test0)
+    TEST(Test_queue_t, Test0)
     {
         queue_ts<int> test_que;
         int num = 10;
@@ -72,7 +72,7 @@ namespace test_threadsafe
         ASSERT_TRUE(test_que.empty());
     }
 
-    TEST(TestUnordered_map, Test0)
+    TEST(Test_unordered_map_ts, Test0)
     {
         unordered_map_ts<int, double> test_ump;
 
@@ -128,7 +128,7 @@ namespace test_threadsafe
         ASSERT_EQ(remove_count, actual_remove_count);
     }
 
-    TEST(TestList, Test0)
+    TEST(Test_list_ts, Test0)
     {
         list_ts<int> test_list;
         int num = 20;
