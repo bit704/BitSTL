@@ -142,10 +142,9 @@ namespace test_threadsafe
             {
                 while (true)
                 {
-                    std::this_thread::sleep_for(milliseconds(1));
+                    std::this_thread::sleep_for(milliseconds(10));
                     test_list.remove_if([](int x) { return x % 2 == 0; });
                 }
-                    
             });
         t1.detach();
         
