@@ -98,8 +98,8 @@ namespace bitstl
         
         T res = init + accumulate_once<Iterator, T>()(start, last);
 
-        for (auto& entry : threads)
-            entry.join();
+        for (auto& thread : threads)
+            thread.join();
 
         for (auto& future : futures)
             res += future.get();
@@ -138,7 +138,7 @@ namespace bitstl
         std::atomic_bool end;
         Comp comp;
 
-        sorter() : max_thread_count(std::thread::hardware_concurrency() / 2),
+        sorter() : max_thread_count(std::thread::hardware_concurrency()),
             end(false) {}
 
         ~sorter()
@@ -208,6 +208,74 @@ namespace bitstl
             return std::move(result);
         }
     };
+
+    template<typename Iterator, typename MatchType>
+    Iterator find_paral(Iterator first, Iterator last, MatchType match)
+    {
+        struct iteration
+        {
+            void operator()(
+                Iterator begin, Iterator end, MatchType match,
+                std::promise<Iterator>* result,
+                std::atomic<bool>* done)
+            {
+                try
+                {
+                    for (; (begin != end) && !done->load(); ++begin)
+                    {
+                        if (*begin == match)
+                        {
+                            result->set_value(begin);
+                            done->store(true);
+                            return;
+                        }
+                    }
+                }
+                catch (...)
+                {
+                    try
+                    {
+                        result->set_exception(std::current_exception());
+                        done->store(true);
+                    }
+                    catch (...)
+                    {}
+                }
+            }
+        };
+
+        const ulong data_length = std::distance(first, last);
+        if (!data_length)
+            return last;
+
+        ulong thread_num = 0, data_per_thread = 0;
+        get_partition(data_length, thread_num, data_per_thread);
+
+        std::promise<Iterator> result;
+        std::atomic<bool> done(false);
+        std::vector<std::thread> threads(thread_num - 1);
+
+        Iterator start = first;
+        for (ulong i = 0; i < (thread_num - 1); ++i)
+        {
+            Iterator end = start;
+            std::advance(end, data_per_thread);
+            threads[i] = std::thread(iteration(), start, end, match, &result, &done);
+            start = end;
+        }
+
+        iteration()(start, last, match, &result, &done);
+
+        for (auto& thread : threads)
+            thread.join();
+
+        if (!done.load())
+            return last;
+
+        return result.get_future().get();
+    }
+
+
 }
 
 #endif // !ALGO_PARAL_H
