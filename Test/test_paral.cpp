@@ -5,11 +5,16 @@ namespace test_paral
 {
     TEST(TestSort, TestQuick_sort)
     {
-        std::list<int> test_list;
+        std::vector<int> v(int(1e4), 0);
+        std::iota(v.begin(), v.end(), 1);
+        auto rd = std::random_device{};
+        auto rng = std::default_random_engine{ rd() };
+        std::shuffle(v.begin(), v.end(), rng);
 
-        test_list.assign(500, 0);
-        std::iota(test_list.begin(), test_list.end(), 1);
-        auto comp = std::less<int>();
+        std::list<int> test_list;
+        test_list.assign(v.begin(), v.end());
+
+        auto comp = std::greater<int>();
 
         BENCHMARK(auto res = quick_sort_paral(test_list, comp);,
             test_list.sort(comp);)

@@ -18,7 +18,9 @@ namespace bitstl
         {
             std::shared_ptr<T> data;
             node* next;
-            node(const T& _data) : data(std::make_shared<T>(_data)) {}
+            node(const T& _data) : data(std::make_shared<T>(_data)), next(nullptr) {}
+            // data移动构造
+            node(T&& _data) : data(std::make_shared<T>(std::move(_data))), next(nullptr) {}
         };
         std::atomic<node*> head_;
 
@@ -28,6 +30,14 @@ namespace bitstl
             node* const new_node = new node(new_value);
             new_node->next = head_.load();
             // 当head未被其它指针改动过时更新head_
+            while (!head_.compare_exchange_weak(new_node->next, new_node));
+        }
+
+        void push(T&& new_value)
+        {
+            // 此处也需要std::move
+            node* const new_node = new node(std::move(new_value));
+            new_node->next = head_.load();
             while (!head_.compare_exchange_weak(new_node->next, new_node));
         }
 
@@ -54,7 +64,7 @@ namespace bitstl
         std::atomic<unsigned int> threads_popping_; // 当前使用pop函数的线程数量
         std::atomic<node*> delete_candidate_; 
 
-        void try_delete(node * old_head)
+        void try_delete(node* old_head)
         {
             // 高并发场景下threads_popping_一直不为1，导致delete_candidate_无限增加，得不到释放
             // 实际上没有线程访问的node即可释放，使用hazard pointer、引用计数能够实现
@@ -73,7 +83,8 @@ namespace bitstl
             }
             else
             {
-                add_candidate(old_head);
+                if(old_head)
+                    add_candidate(old_head);
                 --threads_popping_;
             }
         }
