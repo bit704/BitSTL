@@ -86,7 +86,7 @@ namespace bitstl
         template<typename Predicate>
         void remove_if(Predicate p)
         {
-            node * current = &head_;
+            node* current = &head_;
             std::unique_lock<std::mutex> lock(head_.mtx);
             while (node* const next = current->next.get())
             {
