@@ -15,6 +15,7 @@
 namespace bitstl
 {
     using ulong = unsigned long;
+    using uint = unsigned int;
 
     // 划分子任务
     static void get_partition(const ulong data_length, ulong& thread_num, ulong& data_per_thread)
@@ -134,7 +135,7 @@ namespace bitstl
         stack_ts<chunk_to_sort> chunks;
 
         std::vector<std::thread> threads;
-        const unsigned max_thread_count;
+        const uint max_thread_count;
         std::atomic_bool end;
         Comp comp;
 
@@ -144,7 +145,7 @@ namespace bitstl
         ~sorter()
         {
             end.store(true);
-            for (unsigned int i = 0; i < threads.size(); ++i)
+            for (uint i = 0; i < threads.size(); ++i)
                 threads[i].join();
         }
 
@@ -275,7 +276,103 @@ namespace bitstl
         return result.get_future().get();
     }
 
+    // 线程栅栏，用于多线程同步
+    struct barrier
+    {
+        std::atomic_uint count;
+        std::atomic_uint spaces; 
+        std::atomic_uint generation;
+        barrier(uint _count) : count(_count), spaces(_count), generation(0) {}
 
+        void wait()
+        {
+            const uint g = generation.load();
+            // spaces减1，为0时代表count个线程均已到达barrier，可以进行下一步计算
+            if (!(--spaces))
+            {
+                // 当spaces为0时重置为count
+                spaces = count.load();
+                // 记录所有线程均到达barrier的次数
+                ++generation;
+            }
+            else
+            {
+                // 自己已到达barrier，等待其它线程
+                while (generation.load() == g)
+                    std::this_thread::yield();
+            }
+        }
+
+        // 结束对一个线程的同步
+        void done_waiting()
+        {
+            --count;
+            if (!--spaces)
+            {
+                spaces = count.load();
+                ++generation;
+            }
+        }
+    };
+
+    template<typename Iterator>
+    void partial_sum_paral(Iterator first, Iterator last)
+    {
+        typedef typename Iterator::value_type value_type;
+
+        const ulong data_length = std::distance(first, last);
+        if (data_length <= 1)
+            return;
+
+        barrier br(data_length);
+        // 此算法需要和数据量等同的线程数，仅适用于大规模并行计算机
+        std::vector<std::thread> threads(data_length - 1);
+
+        std::vector<value_type> buffer(first, last);
+        /*
+         * 计算前缀和
+         * 例：1, 1, 1, 1, 1
+         * 第一轮：将距离为1的数相加 1, 2, 2, 2, 2 前2个位置完成前缀和
+         * 第二轮：将距离为2的数相加 1, 2, 3, 4, 4 前4个位置完成前缀和
+         * 第三轮：将距离为4的数相加 1, 2, 3, 4, 5 所有位置完成前缀和
+         * 使用5个线程并发（每个位置对应1个线程），每一轮次内并发计算，距离按2的幂增加
+         * 所有线程均完成一个轮次后（barrier同步）才可进行下一轮次计算
+         * 已经完成计算的位置对应的线程即刻退出同步
+         */
+        auto process_pos = [&](Iterator first, Iterator last, uint i, barrier& b)
+            {
+                value_type& ith_element = *(first + i);
+                bool update_source = false;
+
+                // step即轮次，每一轮次原数据和buffer数据交替作为source和dest               
+                for (uint step = 0, stride = 1; stride <= i; ++step, stride *= 2)
+                {
+                    const value_type& source = (step % 2) ? buffer[i]          : ith_element;
+                    value_type&       dest   = (step % 2) ? ith_element        : buffer[i];
+                    const value_type& addend = (step % 2) ? buffer[i - stride] : *(first + i - stride);
+                    dest = source + addend;
+                    update_source = !(step % 2);
+
+                    b.wait();
+                }
+
+                if (update_source)
+                    ith_element = buffer[i];
+                // 该位置计算已完成，但后续位置计算时仍会用到buffer，因此buffer需要和原数据一致
+                else
+                    buffer[i] = ith_element;
+
+                b.done_waiting();
+            };
+
+        for (ulong i = 0; i < (data_length - 1); ++i)
+            threads[i] = std::thread(process_pos, first, last, i, std::ref(br));
+
+        process_pos(first, last, data_length - 1, br);
+
+        for (auto& thread : threads)
+            thread.join();
+    }
 }
 
 #endif // !ALGO_PARAL_H
