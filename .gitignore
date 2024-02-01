@@ -1,6 +1,9 @@
 # custom
 *.lnk
 
+.vscode
+.VSCodeCounter
+
 #######################################################
 
 ## Ignore Visual Studio temporary files, build results, and
