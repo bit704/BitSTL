@@ -9,8 +9,8 @@ namespace test_parallel
         std::vector<double> v2(int(1e6), 5);
 
         auto op = [](double& x) {x = std::sqrt(x); };
-        BENCHMARK(for_each_paral(v1.begin(), v1.end(), op);,
-            std::for_each(v2.begin(), v2.end(), op);)
+        BENCHMARK(for_each_paral(v1.begin(), v1.end(), op); ,
+            std::for_each(v2.begin(), v2.end(), op););
 
         std::cout << v1[2] << std::endl;
         std::cout << v2[2] << std::endl;
@@ -31,8 +31,8 @@ namespace test_parallel
 
         auto comp = std::greater<int>();
 
-        BENCHMARK(auto res = quick_sort_paral(test_list, comp);,
-            test_list.sort(comp);)
+        BENCHMARK(auto res = quick_sort_paral(test_list, comp); ,
+            test_list.sort(comp););
 
         ASSERT_TRUE(std::is_sorted(res.begin(), res.end(), comp));
     }
@@ -42,8 +42,8 @@ namespace test_parallel
         std::vector<double> test_vec(int(1e6), 2.2);
 
         double res1 = 0, res2 = 0;
-        BENCHMARK(res1 = accumulate_paral(test_vec.begin(), test_vec.end(), 0.);,
-            res2 = std::accumulate(test_vec.begin(), test_vec.end(), 0.);)
+        BENCHMARK(res1 = accumulate_paral(test_vec.begin(), test_vec.end(), 0.); ,
+            res2 = std::accumulate(test_vec.begin(), test_vec.end(), 0.););
 
         ASSERT_NEAR(res1, res2, 1e-3);
     }
@@ -52,8 +52,8 @@ namespace test_parallel
     {
         std::vector<int> v(int(1e6), 0);
         v[200] = 1;
-        BENCHMARK(auto found1 = find_paral(v.begin(), v.end(), 1);,
-            auto found2 = std::find(v.begin(), v.end(), 1);)
+        BENCHMARK(auto found1 = find_paral(v.begin(), v.end(), 1); ,
+            auto found2 = std::find(v.begin(), v.end(), 1););
         ASSERT_EQ(found1, found2);
     }
 
@@ -61,8 +61,8 @@ namespace test_parallel
     {
         std::vector<int> v1(200, 1);
         std::vector<int> v2 = v1;
-        BENCHMARK(partial_sum_paral(v1.begin(), v1.end());,
-            std::partial_sum(v2.begin(), v2.end(), v2.begin());)
+        BENCHMARK(partial_sum_paral(v1.begin(), v1.end()); ,
+            std::partial_sum(v2.begin(), v2.end(), v2.begin()););
         ASSERT_EQ(v1, v2);
     }
 }

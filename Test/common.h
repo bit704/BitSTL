@@ -8,10 +8,7 @@
 #include "threadsafe/unordered_map_ts.h"
 #include "threadsafe/list_ts.h"
 
-#if 1
-#define DEBUGGING
-#endif
-
+// 在项目属性中配置
 #ifdef DEBUGGING
 #define DEBUG_ST (std::osyncstream(std::cout) << "[DEBUG_ST] ")
 #define DEBUG (std::cout << "[DEBUG] ")
@@ -41,7 +38,7 @@ STDSTL                                                            \
 end = steady_clock::now();                                        \
 time = duration_cast<milliseconds>(end - start).count();          \
 std::cout << " <STDSTL> ";                                        \
-std::cout << #STDSTL << " " << YELLOW(time << "ms") << std::endl;
+std::cout << #STDSTL << " " << YELLOW(time << "ms") << std::endl
 
 #endif // !COMMON_H
 
