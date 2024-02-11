@@ -1,6 +1,6 @@
 # BitSTL
 
-出于学习目的开发的C++标准模板库。
+出于学习目的开发的C++标准模板库，基于C++20。
 
 使用GoogleTest测试框架。
 
@@ -79,26 +79,26 @@
    }
    ```
 
-6. allocator参考设计：
+6. `allocator`、`allocator_traits`参考设计：
 
-   - 在C++20中，allocator的`address`、`max_size`、`construct`、`destroy`被废弃，仅保留`allocate`和`deallocate`。为了支持**constexpr**容器，allocator、allocator_traits的成员函数均转为constexpr实现。
+   - 在C++20中，`allocator`的`address`、`max_size`、`construct`、`destroy`被废弃，仅保留`allocate`和`deallocate`。为了支持constexpr容器，`allocator`、`allocator_traits`的成员函数均转为**constexpr**实现。
 
      > [c++ - Why are are std::allocator's construct and destroy functions deprecated in c++17? - Stack Overflow](https://stackoverflow.com/questions/39414610/why-are-are-stdallocators-construct-and-destroy-functions-deprecated-in-c17)
      >
      > [如何评价新并入 C++20 的 constexpr allocation? - 知乎 (zhihu.com)](https://www.zhihu.com/question/336059175)
 
-   - MSVC、GCC、MyTinySTL的allocator直接封装`::operator new`、`::operator delete`。
+   - MSVC、GCC、MyTinySTL的`allocator`直接封装`::operator new`、`::operator delete`。
 
-   - EASTL的allocator直接封装`malloc`、`free`，不是模板，类似`std::allocator<char>`。
+   - EASTL的`allocator`直接封装`malloc`、`free`，不是模板，类似`std::allocator<char>`。
 
-   - 《STL源码解析》中采用两级allocator，一级allocator直接封装`malloc`、`free`、`realloc`，处理要分配的内存超过128bytes的情况；二级allocator以链表形式的**内存池**管理小于128bytes的内存并将其统一为8的倍数，16个自由链表各自管理大小为8\~128bytes的小额区块。
+   - 《STL源码解析》中采用两级`allocator`，一级`allocator`直接封装`malloc`、`free`、`realloc`，处理要分配的内存超过128bytes的情况；二级`allocator`以链表形式的**内存池**管理小于128bytes的内存并将其统一为8的倍数，16个自由链表各自管理大小为8\~128bytes的小额区块。
 
    - C++17引入了`std::pmr`命名空间，可以逐对象而不是逐类型指定内存分配器类型，目前BitSTL不支持。
 
-7. vector参考设计：
+7. `vector`参考设计：
 
    - MSVC - `vector` - `_Calculate_growth`，增长因子为1.5。
-   - GCC - `stl_vector.h`  - ` _M_check_len`，增长因子为2。
+   - GCC - `stl_vector.h`  - ` _M_check_len`，增长因子为2。GCC中`vector`protected继承于`_Vector_base`，将且仅将内存操作放入其中。
    - EASTL - `vector.h` - `GetNewCapacity`，增长因子为2。
    - MyTinySTL - `vector.h` - `get_new_cap`，增长因子为1.5。
    - 《STL源码解析》图4-2使用增长因子为2。
