@@ -19,6 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="allocator_traits.h" />
+    <ClInclude Include="allocator.h" />
     <ClInclude Include="parallel\algo_paral.h" />
     <ClInclude Include="threadsafe\list_ts.h" />
     <ClInclude Include="threadsafe\queue_ts.h" />

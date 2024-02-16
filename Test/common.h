@@ -2,6 +2,8 @@
 #define COMMON_H
 
 #include "pch.h"
+#include "allocator.h"
+#include "allocator_traits.h"
 #include "parallel/algo_paral.h"
 #include "threadsafe/stack_ts.h"
 #include "threadsafe/queue_ts.h"

@@ -36,6 +36,12 @@
     <ClInclude Include="parallel\algo_paral.h">
       <Filter>头文件\parallel</Filter>
     </ClInclude>
+    <ClInclude Include="allocator.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="allocator_traits.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stub.cpp">
