@@ -1,6 +1,6 @@
 /*
- * stack_ts类
- * 无锁栈
+ * 线程安全的栈
+ * 无锁
  */
 #ifndef STACK_TS_H
 #define STACK_TS_H

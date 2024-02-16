@@ -1,6 +1,6 @@
 /*
- * list_ts类
- * 单向链表
+ * 线程安全的单向链表
+ * 在节点一级加锁
  */
 #ifndef LIST_TS_H
 #define LIST_TS_H

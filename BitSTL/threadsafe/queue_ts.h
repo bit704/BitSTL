@@ -1,6 +1,6 @@
 /*
- * queue_ts类
- * 队列
+ * 线程安全的队列
+ * 队头队尾分别加锁
  */
 #ifndef QUEUE_TS_H
 #define QUEUE_TS_H

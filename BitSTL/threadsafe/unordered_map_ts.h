@@ -1,5 +1,5 @@
 /*
- * unordered_map_ts类
+ * 线程安全的哈希查找表
  * 由多个bucket组成，在bucket一级加锁
  */
 #ifndef UNORDERED_MAP_TS_H
