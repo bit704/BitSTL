@@ -1,10 +1,14 @@
 # BitSTL
 
-出于学习目的开发的C++标准模板库，基于C++20。
+C++标准模板库，基于C++20。
 
 使用GoogleTest测试框架。
 
 ## 功能
+
+`allocator.h`：内存分配器。
+
+`allocator_traits.h`：内存分配器萃取接口。
 
 `threadsafe/stack_ts.h`：线程安全的栈。无锁，使用原子类型。
 
@@ -18,7 +22,9 @@
 
 ## 笔记
 
-1. 参考以下资料：
+1. 参考资料：
+
+   [cppreference](https://en.cppreference.com/w/)
 
    《STL源码解析》
 
@@ -79,7 +85,9 @@
    }
    ```
 
-6. `allocator`、`allocator_traits`参考设计：
+6. 对于未使用的变量、函数，GCC可使用`__attribute__((__unused__))`来消除未使用警告。MSVC可使用`(void)`消除未使用变量的警告，但对于未使用函数没有办法。
+
+7. `allocator`、`allocator_traits`参考设计：
 
    - 在C++20中，`allocator`的`address`、`max_size`、`construct`、`destroy`被废弃，仅保留`allocate`和`deallocate`。为了支持constexpr容器，`allocator`、`allocator_traits`的成员函数均转为**constexpr**实现。
 
@@ -95,7 +103,7 @@
 
    - C++17引入了`std::pmr`命名空间，可以逐对象而不是逐类型指定内存分配器类型，目前BitSTL不支持。
 
-7. `vector`参考设计：
+8. `vector`参考设计：
 
    - MSVC - `vector` - `_Calculate_growth`，增长因子为1.5。
    - GCC - `stl_vector.h`  - ` _M_check_len`，增长因子为2。GCC中`vector`protected继承于`_Vector_base`，将且仅将内存操作放入其中。
