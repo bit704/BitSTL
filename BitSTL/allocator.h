@@ -4,6 +4,8 @@
 #ifndef ALLOCATOR_H
 #define ALLOCATOR_H
 
+#include "type_traits.h"
+
 namespace bitstl
 {
     template<typename T>
@@ -15,14 +17,15 @@ namespace bitstl
         using difference_type = std::ptrdiff_t;
 
         // 当容器被移动赋值时，源容器的分配器将被复制到目标容器
-        typedef std::true_type propagate_on_container_move_assignment;
+        using propagate_on_container_move_assignment = true_type;
+        using is_always_equal                        = true_type;
 
         constexpr allocator() noexcept {}
 
         constexpr allocator(const allocator&) noexcept {}
 
-        template<typename T1>
-        constexpr allocator(const allocator<T1>&) noexcept {}
+        template<typename T>
+        constexpr allocator(const allocator<T>&) noexcept {}
 
         constexpr ~allocator() noexcept {}
 
@@ -30,7 +33,7 @@ namespace bitstl
 # define BITSTL_OPERATOR_DELETE ::operator delete
 
         // C++标准允许n为0，但未规定其对应的返回值
-        [[__nodiscard__]] 
+        [[nodiscard]] 
         constexpr T* allocate(size_type n)
         {
             // 不完整类型（前向声明的类或未定义的类）大小为0
