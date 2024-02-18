@@ -42,6 +42,9 @@
     <ClInclude Include="allocator_traits.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="type_traits.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stub.cpp">

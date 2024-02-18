@@ -26,6 +26,7 @@
     <ClInclude Include="threadsafe\queue_ts.h" />
     <ClInclude Include="threadsafe\stack_ts.h" />
     <ClInclude Include="threadsafe\unordered_map_ts.h" />
+    <ClInclude Include="type_traits.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stub.cpp" />
