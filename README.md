@@ -6,6 +6,8 @@ C++标准模板库，基于C++20。
 
 ## 功能
 
+`type_traits.h`：类型萃取工具。
+
 `allocator.h`：内存分配器。
 
 `allocator_traits.h`：内存分配器萃取接口。
@@ -38,15 +40,17 @@ C++标准模板库，基于C++20。
 
    [Alinshans/MyTinySTL](https://github.com/Alinshans/MyTinySTL)
 
-2. MSVC中使用`()`包围函数名，避免其被识别为宏，如`(max)`。
+2. MSVC中使用`()`包围函数名，避免其被识别为宏，如`(max)`。另一种方法是使用`#undef`。
 
-3. 不同STL均使用`__cplusplus`识别C++标准版本（MSVC嵌套了多层宏）。
+3. MSVC对于模板的编译支持较差，往往不能正确报错，GCC表现更好。
+
+4. 不同STL均使用`__cplusplus`识别C++标准版本（MSVC嵌套了多层宏）。
 
    > [Replacing text macros - cppreference.com](https://en.cppreference.com/w/cpp/preprocessor/replace#Predefined_macros)
 
-4. 使用`_MSC_VER`、`__GNUC__`、`__clang__`（`__clang_major__`、`__clang_minor__`、`__clang_patchlevel__`）可识别当前编译器类型及版本。
+5. 使用`_MSC_VER`、`__GNUC__`、`__clang__`（`__clang_major__`、`__clang_minor__`、`__clang_patchlevel__`）可识别当前编译器类型及版本。
 
-5. GCC的 `__builtin_` 前缀用于命名编译器提供的**内建函数**（不是C++ 标准的一部分），如`__builtin_popcount` 计算整数中1的个数、`__builtin_expect`提供分支预测的指示给编译器、`__builtin_addressof`绕过`operator&`重载获取地址。
+6. GCC的 `__builtin_` 前缀用于命名编译器提供的**内建函数**（不是C++ 标准的一部分），如`__builtin_popcount` 计算整数中1的个数、`__builtin_expect`提供分支预测的指示给编译器、`__builtin_addressof`绕过`operator&`重载获取地址。
 
    MSVC中有类似的内建函数，如GCC的`__builtin_popcount`在 MSVC 中对应 `__popcnt` 。
 
@@ -85,9 +89,9 @@ C++标准模板库，基于C++20。
    }
    ```
 
-6. 对于未使用的变量、函数，GCC可使用`__attribute__((__unused__))`来消除未使用警告。MSVC可使用`(void)`消除未使用变量的警告，但对于未使用函数没有办法。
+7. 对于未使用的变量、函数，GCC可使用`__attribute__((__unused__))`来消除未使用警告。MSVC可使用`(void)`消除未使用变量的警告，但对于未使用函数没有办法。
 
-7. `allocator`、`allocator_traits`参考设计：
+8. `allocator`、`allocator_traits`参考设计：
 
    - 在C++20中，`allocator`的`address`、`max_size`、`construct`、`destroy`被废弃，仅保留`allocate`和`deallocate`。为了支持constexpr容器，`allocator`、`allocator_traits`的成员函数均转为**constexpr**实现。
 
@@ -103,7 +107,7 @@ C++标准模板库，基于C++20。
 
    - C++17引入了`std::pmr`命名空间，可以逐对象而不是逐类型指定内存分配器类型，目前BitSTL不支持。
 
-8. `vector`参考设计：
+9. `vector`参考设计：
 
    - MSVC - `vector` - `_Calculate_growth`，增长因子为1.5。
    - GCC - `stl_vector.h`  - ` _M_check_len`，增长因子为2。GCC中`vector`protected继承于`_Vector_base`，将且仅将内存操作放入其中。
