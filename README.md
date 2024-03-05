@@ -1,16 +1,24 @@
 # BitSTL
 
-C++标准模板库，基于C++20。
-
-使用GoogleTest测试框架。
+C++标准模板库，使用GoogleTest测试框架。
 
 ## 功能
 
-`type_traits.h`：类型萃取工具。
+`config.h`：C++基本设置。
+
+`type_traits.h`：类型萃取工具库。
 
 `allocator.h`：内存分配器。
 
 `allocator_traits.h`：内存分配器萃取接口。
+
+`iterator.h`：迭代器。
+
+`memory.h`：动态内存管理库。
+
+`algorithm.h`：算法库。
+
+`vector.h`：动态连续数组。
 
 `threadsafe/stack_ts.h`：线程安全的栈。无锁，使用原子类型。
 
@@ -105,7 +113,7 @@ C++标准模板库，基于C++20。
 
    - 《STL源码解析》中采用两级`allocator`，一级`allocator`直接封装`malloc`、`free`、`realloc`，处理要分配的内存超过128bytes的情况；二级`allocator`以链表形式的**内存池**管理小于128bytes的内存并将其统一为8的倍数，16个自由链表各自管理大小为8\~128bytes的小额区块。
 
-   - C++17引入了`std::pmr`命名空间，可以逐对象而不是逐类型指定内存分配器类型，目前BitSTL不支持。
+   - C++17引入了`std::pmr`命名空间，可以逐对象指定内存资源类型。
 
 9. `vector`参考设计：
 
