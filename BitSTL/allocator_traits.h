@@ -4,8 +4,7 @@
 #ifndef ALLOCATOR_TRAITS_H
 #define ALLOCATOR_TRAITS_H
 
-#include <memory>
-#include "type_traits.h"
+#include "memory.h"
 
 namespace bitstl
 {
@@ -61,14 +60,14 @@ namespace bitstl
         template<typename T, typename... Args>
         static constexpr void construct(Alloc& a, T* p, Args&&... args)
         {
-            ::new (static_cast<void*>(p)) T(std::forward<Args>(args)...);
+            construct_at(p, std::forward<Args>(args)...);
         }
 
         // alloactor类的destroy函数自C++20废弃
-        template< class T >
+        template<typename T>
         static constexpr void destroy(Alloc& a, T* p)
         {
-            p->~T();
+            destory_at(p);
         }
 
         // alloactor类的max_size函数自C++20废弃

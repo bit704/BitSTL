@@ -4,6 +4,7 @@
 #ifndef ALLOCATOR_H
 #define ALLOCATOR_H
 
+#include "config.h"
 #include "type_traits.h"
 
 namespace bitstl
@@ -13,8 +14,8 @@ namespace bitstl
     {
     public:
         using value_type      = T;
-        using size_type       = std::size_t;
-        using difference_type = std::ptrdiff_t;
+        using size_type       = size_t;
+        using difference_type = ptrdiff_t;
 
         // 当容器被移动赋值时，源容器的分配器将被复制到目标容器
         using propagate_on_container_move_assignment = true_type;
@@ -40,12 +41,8 @@ namespace bitstl
             static_assert(sizeof(T) != 0, "cannot allocate incomplete types");
 
             // 无法分配
-            if (n > _max_size())
-            {
-                if (n > (std::size_t(-1) / sizeof(T)))
-                    throw std::bad_array_new_length();
-                throw std::bad_alloc;
-            }
+            if (n > (size_t(-1) / sizeof(T)))
+                throw std::bad_array_new_length();
 
             // C++17提供__STDCPP_DEFAULT_NEW_ALIGNMENT__，超过阈值时可强行对齐
             if (alignof(T) > __STDCPP_DEFAULT_NEW_ALIGNMENT__)
@@ -84,16 +81,6 @@ namespace bitstl
             noexcept
         {
             return false;
-        }
-
-    private:
-        constexpr size_type _max_size() 
-            const noexcept
-        {
-            if (std::numeric_limits<std::ptrdiff_t>::max() < std::numeric_limits<std::size_t>::max())
-                return std::numeric_limits<std::ptrdiff_t>::max() / sizeof(T);
-
-            return std::size_t(-1) / sizeof(T);
         }
     };
 }

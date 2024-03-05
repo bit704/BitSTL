@@ -19,14 +19,19 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="algorithm.h" />
     <ClInclude Include="allocator_traits.h" />
     <ClInclude Include="allocator.h" />
+    <ClInclude Include="config.h" />
+    <ClInclude Include="iterator.h" />
+    <ClInclude Include="memory.h" />
     <ClInclude Include="parallel\algo_paral.h" />
     <ClInclude Include="threadsafe\list_ts.h" />
     <ClInclude Include="threadsafe\queue_ts.h" />
     <ClInclude Include="threadsafe\stack_ts.h" />
     <ClInclude Include="threadsafe\unordered_map_ts.h" />
     <ClInclude Include="type_traits.h" />
+    <ClInclude Include="vector.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stub.cpp" />

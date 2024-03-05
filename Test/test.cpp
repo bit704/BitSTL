@@ -13,8 +13,8 @@ namespace test_type_traits
 
     TEST(Test_is_same, Test0)
     {
-        ASSERT_TRUE((is_same<int, int>()));
-        ASSERT_FALSE((is_same<int, float>()));
+        ASSERT_TRUE((is_same_v<int, int>));
+        ASSERT_FALSE((is_same_v<int, float>));
     }
 
     template<typename T>
@@ -22,10 +22,35 @@ namespace test_type_traits
 
     TEST(Test_replace_first_arg, Test0)
     {
-        ASSERT_TRUE((is_same<
+        ASSERT_TRUE((is_same_v<
             Foo<int>,
-            typename replace_first_arg<Foo<float>, int>::type>()));
+            typename replace_first_arg<Foo<float>, int>::type>));
+    }
+}
 
+namespace test_vector
+{
+    TEST(Test_ctor, Test0)
+    {
+        vector<int> v1(10);
+        ASSERT_EQ(v1[5], 0);
+        vector<int> v2(200, 3);
+        ASSERT_EQ(v2[127], 3);
+    }
+
+    TEST(Test_ctor, Test1)
+    {
+        class Foo
+        {
+        public:
+            int x;
+            Foo() = default;
+            Foo(int _x) : x(_x + 1) {}
+        };
+        vector<Foo> v1(10);
+        ASSERT_EQ(v1[5].x, 0);
+        vector<Foo> v2(200, 3);
+        ASSERT_EQ(v2[127].x, 4);
     }
 }
 
