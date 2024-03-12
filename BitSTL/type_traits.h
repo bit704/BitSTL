@@ -9,7 +9,15 @@
 
 namespace bitstl
 {
-    // 整型常量
+    /*
+     * 利用SFINAE在模板元编程中检查表达式是否有效
+     */
+    template<typename...>
+    using void_t = void;
+
+    /*
+     * 整型常量
+     */
     template<typename T, T v>
     struct integral_constant
     {
@@ -26,9 +34,11 @@ namespace bitstl
     using true_type  = integral_constant<bool, true>;
     using false_type = integral_constant<bool, false>;
 
-    // https://en.cppreference.com/w/cpp/types/type_identity
-    // 建立无类型推导上下文，避免类型推导
-    template <typename T>
+    /*
+     * https://en.cppreference.com/w/cpp/types/type_identity
+     * 建立无类型推导上下文，避免类型推导，防止隐式类型转换
+     */
+    template<typename T>
     struct type_identity
     {
         using type = T;
@@ -37,16 +47,20 @@ namespace bitstl
     template<typename T>
     using type_identity_t = typename type_identity<T>::type;
 
-    // 判断类型是否相等
-    template <typename, typename>
+    /*
+     * 判断类型是否相等 
+     */
+    template<typename, typename>
     inline constexpr bool is_same_v = false;
-    template <typename T>
+    template<typename T>
     inline constexpr bool is_same_v<T, T> = true;
 
-    template <typename T, typename U>
+    template<typename T, typename U>
     struct is_same : integral_constant<bool, is_same_v<T, U>> {};
 
-    // 将SomeTemplate模板第一个模板参数替换为U
+    /*
+     * 将SomeTemplate模板第一个模板参数替换为U
+     */
     template<typename T, typename U>
     struct replace_first_arg {};
 
@@ -60,11 +74,9 @@ namespace bitstl
         using type = SomeTemplate<U, Types...>;
     };
 
-    // 利用SFINAE在模板元编程中检查表达式是否有效
-    template<typename...> 
-    using void_t = void;
-
-    // 去掉const
+    /*
+     * 去掉const
+     */
     template<typename T>
     struct remove_const
     {
@@ -80,7 +92,9 @@ namespace bitstl
     template<typename T>
     using remove_const_t = typename remove_const<T>::type;
 
-    // 去掉volatile
+    /*
+     * 去掉volatile
+     */
     template<typename T>
     struct remove_volatile
     {
@@ -96,7 +110,9 @@ namespace bitstl
     template<typename T>
     using remove_volatile_t = typename remove_volatile<T>::type;
 
-    // 去掉const和volatile
+    /*
+     * 去掉const和volatile
+     */
     template<typename T>
     struct remove_cv
     {
@@ -124,7 +140,9 @@ namespace bitstl
     template<typename T>
     using remove_cv_t = typename remove_cv<T>::type;
 
-    // 添加const
+    /*
+     * 添加const
+     */
     template<typename T>
     struct add_const
     {
@@ -134,7 +152,9 @@ namespace bitstl
     template<typename T>
     using add_const_t = typename add_const<T>::type;
 
-    // 添加volatile
+    /*
+     * 添加volatile
+     */
     template<typename T>
     struct add_volatile
     {
@@ -144,7 +164,9 @@ namespace bitstl
     template<typename T>
     using add_volatile_t = typename add_volatile<T>::type;
 
-    // 添加const volatile
+    /*
+     * 添加const volatile
+     */
     template<typename T>
     struct add_cv
     {
@@ -154,7 +176,9 @@ namespace bitstl
     template<typename T>
     using add_cv_t = typename add_cv<T>::type;
 
-    // 去掉引用
+    /*
+     * 去掉引用
+     */
     template<typename T>
     struct remove_reference
     {
@@ -173,10 +197,12 @@ namespace bitstl
         using type = T;
     };
 
-    template <typename T>
+    template<typename T>
     using remove_reference_t = typename remove_reference<T>::type;
 
-    // 添加左值引用
+    /*
+     * 添加左值引用
+     */
     template<typename T, typename = void>
     struct add_lvalue_reference_helper
     {
@@ -198,7 +224,9 @@ namespace bitstl
     template<typename T>
     using add_lvalue_reference_t = typename add_lvalue_reference<T>::type;
 
-    // 添加右值引用
+    /*
+     * 添加右值引用
+     */
     template<typename T, typename = void>
     struct add_rvalue_reference_helper
     {
@@ -220,7 +248,9 @@ namespace bitstl
     template<typename T>
     using add_rvalue_reference_t = typename add_rvalue_reference<T>::type;
 
-    // 是否是左值引用
+    /*
+     * 是否是左值引用 
+     */
     template<typename>
     struct is_lvalue_reference : public false_type {};
 
@@ -230,7 +260,9 @@ namespace bitstl
     template<typename T>
     using is_lvalue_reference_v = is_lvalue_reference<T>::value;
 
-    // 是否是右值引用
+    /*
+     * 是否是右值引用 
+     */
     template<typename>
     struct is_rvalue_reference : public false_type {};
 
@@ -240,7 +272,10 @@ namespace bitstl
     template<typename T>
     using is_rvalue_reference_v = is_rvalue_reference<T>::value;
 
-    // forward完美转发，利用引用折叠
+    /*
+     * forward完美转发，利用引用折叠 
+     */
+    // 转发左值
     template<typename T>
     [[nodiscard]]
     constexpr T&& forward(remove_reference_t<T>& t) 
@@ -249,6 +284,9 @@ namespace bitstl
         return static_cast<T&&>(t);
     }
 
+    /*
+     * 转发右值
+     */
     template<typename T>
     [[nodiscard]]
      constexpr T&& forward(remove_reference_t<T>&& t) noexcept
@@ -258,7 +296,9 @@ namespace bitstl
         return static_cast<T&&>(t);
     }
 
-     // move转为右值
+     /*
+      * move转为右值
+      */
      template<typename T>
      [[nodiscard]]
      constexpr remove_reference_t<T>&& move(T&& t)
@@ -267,19 +307,41 @@ namespace bitstl
          return static_cast<remove_reference_t<T>&&>(t);
      }
 
-     // enable_if_t只有当Cond为true时才被定义
+     /*
+      * 检查条件
+      */
      template<bool, typename T = void>
-     struct enable_if
-     { };
+     struct enable_if {};
 
      template<typename T>
      struct enable_if<true, T>
      {
          typedef T type;
      };
-
+     // 只有当Cond为true时type才被定义为类型为T的对象
      template<bool Cond, typename T = void>
      using enable_if_t = typename enable_if<Cond, T>::type;
+
+     /*
+      *  Cond为true时返回if类型，为false时返回Else类型
+      */
+     template<bool>
+     struct conditional
+     {
+         template<typename T, typename>
+         using type = T;
+     };
+
+     template<>
+     struct conditional<false>
+     {
+         template<typename, typename U>
+         using type = U;
+     };
+
+     template<bool Cond, typename If, typename Else>
+     using conditional_t = typename conditional<Cond>::template type<If, Else>;
+
 }
 
 #endif // !TYPE_TRAITS_H

@@ -67,7 +67,7 @@ namespace bitstl
         template<typename T>
         static constexpr void destroy(Alloc& a, T* p)
         {
-            destory_at(p);
+            destroy_at(p);
         }
 
         // alloactor类的max_size函数自C++20废弃

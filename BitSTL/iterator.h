@@ -22,7 +22,9 @@ namespace bitstl
     // 连续迭代器（内存中连续存储）
     struct contiguous_iterator_tag : public random_access_iterator_tag {};
 
-    // 迭代器萃取接口
+    /*
+     *  迭代器萃取接口 
+     */
     template<typename Iterator, typename = void>
     struct iterator_traits_helper {};
 
@@ -46,6 +48,15 @@ namespace bitstl
     template<typename Iterator>
     struct iterator_traits : public iterator_traits_helper<Iterator> {};
 
+    // 获得迭代器类型的对象用于标签分派函数重载
+    template<typename Iterator>
+    typename iterator_traits<Iterator>::iterator_category
+        get_iterator_category(const Iterator&)
+    {
+        typedef typename iterator_traits<Iterator>::iterator_category category;
+        return category();
+    }
+
     // 对普通指针的特化版本
     // C++20不再需要const T*的特化版本
     // 特殊迭代器的类型定义由所需容器自行实现
@@ -59,6 +70,34 @@ namespace bitstl
         using pointer           = T*;
         using reference         = T&;
     };
+
+    /*
+     * 判断迭代器类型
+     */
+    template<typename Iterator>
+    using iterator_category_t = typename iterator_traits<Iterator>::iterator_category;
+
+    // 若不加上typename = iterator_category_t<Iterator>
+    // 在编译器在为vector<int> v3(200, 3);调用构造函数时
+    // 匹配constexpr vector(InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type())时
+    // 会实例化出iterator_category_t<Iterator>，而不是匹配失败，从而导致编译失败
+    template<typename Iterator, typename = iterator_category_t<Iterator>>
+    inline constexpr bool is_input_iterator = std::is_convertible_v<iterator_category_t<Iterator>, input_iterator_tag>;
+
+    template<typename Iterator, typename = iterator_category_t<Iterator>>
+    inline constexpr bool is_output_iterator = std::is_convertible_v<iterator_category_t<Iterator>, output_iterator_tag>;
+
+    template<typename Iterator, typename = iterator_category_t<Iterator>>
+    inline constexpr bool is_forward_iterator = std::is_convertible_v<iterator_category_t<Iterator>, forward_iterator_tag>;
+
+    template<typename Iterator, typename = iterator_category_t<Iterator>>
+    inline constexpr bool is_bidirectional_iterator = std::is_convertible_v<iterator_category_t<Iterator>, bidirectional_iterator_tag>;
+
+    template<typename Iterator, typename = iterator_category_t<Iterator>>
+    inline constexpr bool is_random_access_iterator = std::is_convertible_v<iterator_category_t<Iterator>, random_access_iterator_tag>;
+
+    template<typename Iterator, typename = iterator_category_t<Iterator>>
+    inline constexpr bool is_contiguous_iterator = std::is_convertible_v<iterator_category_t<Iterator>, contiguous_iterator_tag>;
 
     // 迭代器适配器
     // 可以将普通指针对应的的迭代器转换为类
@@ -156,6 +195,48 @@ namespace bitstl
             const noexcept
         {
             return current;
+        }
+
+        constexpr difference_type operator-(const iterator_adpater& other)
+            const noexcept
+        {
+            return current - other.base();
+        }
+
+        constexpr bool operator==(const iterator_adpater& other)
+            const noexcept
+        {
+            return current == other.base();
+        }
+
+        constexpr bool operator!=(const iterator_adpater& other)
+            const noexcept
+        {
+            return current != other.base();
+        }
+
+        constexpr bool operator<(const iterator_adpater& other)
+            const noexcept
+        {
+            return current < other.base();
+        }
+
+        constexpr bool operator<=(const iterator_adpater& other)
+            const noexcept
+        {
+            return current <= other.base();
+        }
+
+        constexpr bool operator>(const iterator_adpater& other)
+            const noexcept
+        {
+            return current > other.base();
+        }
+
+        constexpr bool operator>=(const iterator_adpater& other)
+            const noexcept
+        {
+            return current >= other.base();
         }
     };
 
@@ -320,6 +401,39 @@ namespace bitstl
             const reverse_iterator<IteratorR>& rhs)
     { 
         return lhs.base() <= rhs.base();
+    }
+
+    /*
+     * 计算迭代器间距离 
+     */
+    // input_iterator_tag
+    template<typename InputIterator>
+    typename iterator_traits<InputIterator>::difference_type
+        distance_dispatch(InputIterator first, InputIterator last, input_iterator_tag)
+    {
+        typename iterator_traits<InputIterator>::difference_type n = 0;
+        while (first != last)
+        {
+            ++first;
+            ++n;
+        }
+        return n;
+    }
+
+    // random_access_iterator_tag
+    template<typename RandomIterator>
+    typename iterator_traits<RandomIterator>::difference_type
+        distance_dispatch(RandomIterator first, RandomIterator last, random_access_iterator_tag)
+    {
+        return last - first;
+    }
+
+    // 统一接口
+    template<typename InputIterator>
+    typename iterator_traits<InputIterator>::difference_type
+        distance(InputIterator first, InputIterator last)
+    {
+        return distance_dispatch(first, last, get_iterator_category(first));
     }
 }
 
