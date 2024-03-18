@@ -3,6 +3,7 @@
 
 #include "pch.h"
 #include "vector.h"
+#include "delegate.h"
 #include "parallel/algo_paral.h"
 #include "threadsafe/stack_ts.h"
 #include "threadsafe/queue_ts.h"

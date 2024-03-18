@@ -23,6 +23,7 @@
     <ClInclude Include="allocator_traits.h" />
     <ClInclude Include="allocator.h" />
     <ClInclude Include="config.h" />
+    <ClInclude Include="delegate.h" />
     <ClInclude Include="iterator.h" />
     <ClInclude Include="memory.h" />
     <ClInclude Include="parallel\algo_paral.h" />

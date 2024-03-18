@@ -232,6 +232,66 @@ namespace test_vector
     }
 }
 
+namespace test_delegate
+{
+    class Foo
+    {      
+    public:
+        int x = 0;
+
+        Foo() {}
+        ~Foo() {}
+
+        int add(int a, int b)
+        {
+            return a + b;
+        }
+
+        void store_add(int a, int b)
+        {
+            x = a + b;
+        }
+    };
+    
+    int add(int a, int b)
+    {
+        return a + b;
+    }
+
+    TEST(Test_delegate_twoparam, Test0)
+    {
+        Foo test;
+        auto delegate1 = 
+            delegate_twoparam<int, int, int>
+            ::from_class_func<Foo, &Foo::add>(&test);
+        ASSERT_EQ(delegate1(1, 3), 4);
+        ASSERT_EQ(delegate1.execute(2, 2), 4);
+        ASSERT_TRUE(delegate1.isbound());
+        delegate1.unbind();
+        ASSERT_FALSE(delegate1.isbound());
+        delegate1.bind_func<&add>();
+        ASSERT_EQ(delegate1(1, 7), 8);
+
+        auto delegate2 =
+            delegate_twoparam<int, int, int>
+            ::from_func<&add>();
+        ASSERT_EQ(delegate2(2, 4), 6);
+        ASSERT_EQ(delegate2.execute(2, 4), 6);
+        ASSERT_TRUE(delegate2.isbound());
+        delegate2.unbind();
+        ASSERT_FALSE(delegate2.isbound());
+        delegate2.bind_class_func<Foo, &Foo::add>(&test);
+        ASSERT_EQ(delegate2(1, 5), 6);
+        ASSERT_FALSE(delegate2.execute_ifbound(2, 3));
+
+        auto delegate3 =
+            delegate_twoparam<void, int, int>
+            ::from_class_func<Foo, &Foo::store_add>(&test);
+        ASSERT_TRUE(delegate3.execute_ifbound(2, 3));
+        ASSERT_TRUE(test.x, 5);        
+    }
+}
+
 int main(int argc, char** argv)
 {
     testing::InitGoogleTest(&argc, argv);

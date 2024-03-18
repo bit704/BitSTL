@@ -60,6 +60,9 @@
     <ClInclude Include="algorithm.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="delegate.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stub.cpp">

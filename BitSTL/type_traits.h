@@ -323,7 +323,7 @@ namespace bitstl
      using enable_if_t = typename enable_if<Cond, T>::type;
 
      /*
-      *  Cond为true时返回if类型，为false时返回Else类型
+      *  Cond为true时返回If类型，为false时返回Else类型
       */
      template<bool>
      struct conditional
@@ -342,6 +342,26 @@ namespace bitstl
      template<bool Cond, typename If, typename Else>
      using conditional_t = typename conditional<Cond>::template type<If, Else>;
 
+     /*
+      * 判断类型是否为void 
+      */
+     template<typename T>
+     struct is_void : public false_type {};
+
+     template<>
+     struct is_void<void> : public true_type {};
+
+     template<>
+     struct is_void<const void> : public true_type {};
+
+     template<>
+     struct is_void<volatile void> : public true_type {};
+
+     template<>
+     struct is_void<const volatile void> : public true_type {};
+
+     template <typename T>
+     inline constexpr bool is_void_v = is_void<T>::value;
 }
 
 #endif // !TYPE_TRAITS_H
