@@ -20,6 +20,8 @@ C++标准模板库，使用GoogleTest测试框架。
 
 `vector.h`：动态连续数组。
 
+`delegate.h`：委托。
+
 `threadsafe/stack_ts.h`：线程安全的栈。无锁，使用原子类型。
 
 `threadsafe/unordered_map_ts.h`：线程安全的哈希查找表。在bucket一级加锁。
@@ -118,7 +120,42 @@ C++标准模板库，使用GoogleTest测试框架。
 9. `vector`参考设计：
 
    - MSVC - `vector` - `_Calculate_growth`，增长因子为1.5。
+   
    - GCC - `stl_vector.h`  - ` _M_check_len`，增长因子为2。GCC中`vector`protected继承于`_Vector_base`，将且仅将内存操作放入其中。
+   
    - EASTL - `vector.h` - `GetNewCapacity`，增长因子为2。
+   
    - MyTinySTL - `vector.h` - `get_new_cap`，增长因子为1.5。
+   
    - 《STL源码解析》图4-2使用增长因子为2。
+
+10. 使用SFINAE的两种写法：
+
+    ```c++
+    // 写法1：使用非类型模板参数
+    template<
+        typename InputIterator,
+        typename enable_if_t<is_input_iterator<InputIterator>, int> = 0
+    >
+    // 写法2：使用类型模板参数
+    template<
+        typename InputIterator,
+        typename = enable_if_t<is_input_iterator<InputIterator>>
+    >
+    ```
+
+    > void不可作为非类型模板参数。
+    >
+    > 允许以下类型作为非类型模板参数：
+    >
+    > 1. 整型或枚举
+    > 
+    > 2. 指向对象或函数的指针
+    > 
+    > 3. lvalue引用类型（C++11）
+    > 
+    > 4. `std::nullptr_t`类型（C++11）
+    > 
+    > 5. 指向成员的指针（C++11）
+    > 
+    > 6. 浮点和类类型（C++20）
