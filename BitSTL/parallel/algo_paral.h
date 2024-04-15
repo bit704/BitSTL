@@ -59,8 +59,7 @@ namespace bitstl
         {
             futures[i].get();
             threads[i].join();
-        }
-            
+        }            
     }
 
     template<typename Iterator, typename T>
