@@ -81,7 +81,7 @@ namespace bitstl
         using iterator        = iterator_adpater<pointer, vector>;
         using const_iterator  = iterator_adpater<const_pointer, vector>;        
         using reverse_iterator       = reverse_iterator<iterator>;
-        // 不加bitstl::会使用上面的reverse_iterator，导致编译错误
+        // 不加bitstl::会使用上面定义的reverse_iterator而不是reverse_iterator模板，导致编译错误
         using const_reverse_iterator = bitstl::reverse_iterator<const_iterator>;                
         
         /*
@@ -192,7 +192,6 @@ namespace bitstl
                         Alloc_traits::destroy(this->alloc, cur);
                     this->finish = this->start + new_size;
                 }
-
             }
             return *this;
         }
@@ -239,13 +238,14 @@ namespace bitstl
         >
         constexpr void assign(InputIterator first, InputIterator last)
         {
-            assert(first < last);
-            assign_copy(first, last, get_iterator_category(first));
+            vector tmp = vector(first, last);
+            swap(tmp);
         }
 
         constexpr void assign(std::initializer_list<T> ilist)
         {
-            assign_copy(ilist.begin(), ilist.end(), forward_iterator_tag{});
+            vector tmp = vector(ilist);
+            swap(tmp);
         }
         
         /*
@@ -258,29 +258,30 @@ namespace bitstl
         }
 
         /*
-         * 元素访问 
+         * 元素访问
+         * at执行边界检查，[]不执行
          */
         reference at(size_type pos)
         {
+            assert(pos < size());
             return (*this)[pos];
         }
 
         const_reference at(size_type pos) 
             const
         {
+            assert(pos < size());
             return (*this)[pos];
         }
 
         reference operator[](size_type n)
         {
-            assert(n < size());
             return *(this->start + n);
         }
 
         const_reference operator[](size_type n) 
             const
         {
-            assert(n < size());
             return *(this->start + n);
         }
 
@@ -454,70 +455,128 @@ namespace bitstl
         constexpr void clear()
             noexcept
         {
-
+            erase(begin(), end());
         }
 
-        constexpr iterator insert(const_iterator pos, const T& value)
+        constexpr iterator insert(iterator pos, const T& value)
         {
-
+            difference_type offset = pos - begin();
+            if (this->finish == this->end_of_storage)
+                grow();
+            iterator new_pos = begin() + offset;
+            this->finish = move(new_pos, end(), new_pos + 1).base();
+            Alloc_traits::construct(this->alloc, new_pos.base(), value);
+            return new_pos;
         }
 
-        constexpr iterator insert(const_iterator pos, T&& value)
+        constexpr iterator insert(iterator pos, T&& value)
         {
-
-        }
-
-        constexpr iterator insert(const_iterator pos, size_type count, const T& value)
-        {
-
-        }
-
-        template<typename InputIterator>
-        constexpr iterator insert(const_iterator pos, InputIterator first, InputIterator last)
-        {
-
-        }
-
-        constexpr iterator insert(const_iterator pos, std::initializer_list<T> ilist)
-        {
-
+            difference_type offset = pos - begin();
+            if (this->finish == this->end_of_storage)
+                grow();
+            iterator new_pos = begin() + offset;
+            this->finish = move(new_pos, end(), new_pos + 1).base();
+            Alloc_traits::construct(this->alloc, new_pos.base(), move(value));
+            return new_pos;
         }
 
         template<typename... Args>
-        constexpr iterator emplace(const_iterator pos, Args&&... args)
+        constexpr iterator emplace(iterator pos, Args&&... args)
         {
-
+            difference_type offset = pos - begin();
+            if (this->finish == this->end_of_storage)
+                grow();
+            iterator new_pos = begin() + offset;
+            this->finish = move(new_pos, end(), new_pos + 1).base();
+            Alloc_traits::construct(this->alloc, new_pos.base(), forward<Args>(args)...);
+            return new_pos;
         }
 
-        constexpr iterator erase(const_iterator pos)
+        constexpr iterator insert(iterator pos, size_type count, const T& value)
         {
-
+            difference_type offset = pos - begin();
+            if (this->finish + count > this->end_of_storage)
+                grow(count);
+            iterator new_pos = begin() + offset;
+            this->finish = move(new_pos, end(), new_pos + count).base();
+            uninitialized_fill_n(new_pos, count, value);
+            return new_pos;
         }
 
-        constexpr iterator erase(const_iterator first, const_iterator last)
+        template<
+            typename InputIterator,
+            typename = enable_if_t<is_input_iterator<InputIterator>>
+        >
+        constexpr iterator insert(iterator pos, InputIterator first, InputIterator last)
         {
+            difference_type offset = pos - begin();
+            difference_type count = distance(first, last);
+            if (this->finish + count > this->end_of_storage)
+                grow(count);
+            iterator new_pos = begin() + offset;
+            this->finish = move(new_pos, end(), new_pos + count).base();
+            uninitialized_copy(first, last, new_pos);
+            return new_pos;
+        }
 
+        constexpr iterator insert(iterator pos, std::initializer_list<T> ilist)
+        {
+            difference_type offset = pos - begin();
+            difference_type count = ilist.size();
+            if (this->finish + count > this->end_of_storage)
+                grow(count);
+            iterator new_pos = begin() + offset;
+            this->finish = move(new_pos, end(), new_pos + count).base();
+            uninitialized_copy(ilist.begin(), ilist.end(), new_pos);
+            return new_pos;
+        }
+
+        constexpr iterator erase(iterator pos)
+        {
+            this->finish = move(pos + 1, end(), pos).base();
+            Alloc_traits::destroy(this->alloc, this->finish);
+            return pos;
+        }
+
+        constexpr iterator erase(iterator first, iterator last)
+        {
+            if (first != last)
+            {
+                auto new_finish = move(last, end(), first).base();
+                for(auto tmp = new_finish; tmp != this->finish; ++tmp)
+                    Alloc_traits::destroy(this->alloc, tmp);
+                this->finish = new_finish;
+            }
+            return first;
         }
 
         constexpr void push_back(const T& value)
         {
-
+            if (this->finish == this->end_of_storage)
+                grow();            
+            Alloc_traits::construct(this->alloc, this->finish, value);
+            ++this->finish;
         }
 
         constexpr void push_back(T&& value)
         {
-
+            emplace_back(move(value));
         }
 
         template<typename... Args>
         constexpr reference emplace_back(Args&&... args)
         {
-
+            if (this->finish == this->end_of_storage)
+                grow();
+            Alloc_traits::construct(this->alloc, this->finish, forward<Args>(args)...);
+            ++this->finish;
+            return *(this->finish - 1);
         }
 
         constexpr void pop_back()
         {
-
+            --this->finish;
+            Alloc_traits::destroy(this->alloc, this->finish);
         }
 
         void resize(size_type count)
@@ -527,7 +586,7 @@ namespace bitstl
 
         void resize(size_type count, const value_type& value)
         {
-
+            assign(count, value);
         }
 
         constexpr void swap(vector& other) 
@@ -577,19 +636,29 @@ namespace bitstl
 
         void assign_count(size_type n, const value_type& value)
         {
-
+            if (n > capacity())
+            {
+                vector tmp(n, value);
+                swap(tmp);
+            }
+            else if (n > size())
+            {
+                fill(begin(), end(), value);
+                const size_type add = n - size();
+                this->finish = uninitialized_fill_n(this->finish, add, value);
+            }
+            else
+            {
+                auto new_finish = fill_n(this->start, n, value);
+                erase(iterator(new_finish), end());
+                this->finish = new_finish;
+            }
         }
 
-        template <class InputIterator>
-        void assign_copy(InputIterator first, InputIterator last, input_iterator_tag)
+        void grow(size_type count = 1)
         {
-
-        }
-
-        template <class ForwardIterator>
-        void assign_copy(ForwardIterator first, ForwardIterator last, forward_iterator_tag)
-        {
-
+            const size_type len = this->finish - this->start;
+            reserve(std::max(len * 2, len + count));
         }
     };
 

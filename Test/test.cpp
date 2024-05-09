@@ -185,7 +185,7 @@ namespace test_vector
         ASSERT_EQ(v2.capacity(), 3);
     }
 
-    TEST(Test_assign, Test0)
+    TEST(Test_assign_op, Test0)
     {
         vector<int> v1{ 1, 2 };
         vector<int> v2{ 1, 2, 3, 4 };
@@ -194,7 +194,7 @@ namespace test_vector
         ASSERT_EQ(v1.capacity(), 4);
     }
 
-    TEST(Test_assign, Test1)
+    TEST(Test_assign_op, Test1)
     {
         vector<int> v1{ 1, 2, 3, 4 };
         vector<int> v2{ 1, 2 };
@@ -203,7 +203,7 @@ namespace test_vector
         ASSERT_EQ(v1.capacity(), 4);
     }
 
-    TEST(Test_assign, Test2)
+    TEST(Test_assign_op, Test2)
     {
         vector<int> v1{ 1, 2 };
         vector<int> v2{ 1, 2, 3, 4 };
@@ -213,7 +213,7 @@ namespace test_vector
         ASSERT_EQ(v1.capacity(), 4);
     }
 
-    TEST(Test_assign, Test3)
+    TEST(Test_assign_op, Test3)
     {
         vector<int> v1{ 1, 2 };
         vector<int> v2{ 1, 2, 3, 4 };
@@ -223,12 +223,103 @@ namespace test_vector
         ASSERT_EQ(v2.size(), 0);
     }
 
-    TEST(Test_assign, Test4)
+    TEST(Test_assign_op, Test4)
     {
         vector<int> v1{ 1, 2 };
         v1 = { 1, 2, 3, 4 };
         ASSERT_EQ(v1.size(), 4);
         ASSERT_EQ(v1.capacity(), 4);
+    }
+
+    TEST(Test_assign, Test0)
+    {
+        vector<int> v1{ 1, 2, 3};
+        v1.assign(5, 1);
+        ASSERT_EQ(v1.size(), 5);
+        ASSERT_EQ(v1.capacity(), 5);
+    }
+
+    TEST(Test_assign, Test1)
+    {
+        vector<int> v1{ 1, 2, 3 };
+        v1.reserve(7);
+        v1.assign(5, 1);
+        ASSERT_EQ(v1.size(), 5);
+        ASSERT_EQ(v1.capacity(), 7);
+    }
+
+    TEST(Test_assign, Test2)
+    {
+        vector<int> v1{ 1, 2, 3 };
+        v1.assign(2, 1);
+        ASSERT_EQ(v1.size(), 2);
+        ASSERT_EQ(v1.capacity(), 3);
+    }
+
+    TEST(Test_assign, Test3)
+    {
+        vector<int> v1{ 1, 2, 3 };
+        vector<int> v2{ 4, 5, 6 };
+
+        v1.assign(v2.begin(), v2.begin() + 2);
+        ASSERT_EQ(v1.size(), 2);
+        ASSERT_EQ(v1.capacity(), 2);
+
+        v1.assign({ 7, 8, 9, 10 });
+        ASSERT_EQ(v1.size(), 4);
+        ASSERT_EQ(v1.capacity(), 4);
+
+        v1.resize(5, 8);
+        ASSERT_EQ(v1[0], 8);
+        ASSERT_EQ(v1.size(), 5);
+        ASSERT_EQ(v1.capacity(), 5);
+    }
+
+    TEST(Test_erase, Test0)
+    {
+        vector<int> v1{ 1, 2, 3, 4, 5, 6 };
+        v1.erase(v1.begin() + 1);
+        ASSERT_EQ(v1[1], 3);
+        v1.erase(v1.begin(), v1.end() - 1);
+        ASSERT_EQ(v1[0], 6);
+        v1.clear();
+        ASSERT_EQ(v1.size(), 0);
+        ASSERT_EQ(v1.capacity(), 6);
+    }
+
+    TEST(Test_push_pop, test0)
+    {
+        vector<int> v1;
+        int x = 3;
+        v1.resize(5, 1);        
+        v1.push_back(2);
+        v1.push_back(x);
+        v1.pop_back();
+        ASSERT_EQ(v1.emplace_back(move(x)), x);
+        ASSERT_EQ(v1.size(), 7);
+        ASSERT_EQ(v1.capacity(), 10);
+    }
+
+    TEST(Test_insert, test0)
+    {
+        vector<int> v1{ 1, 2, 3, 4, 5, 6 };
+        int x = 3;
+        v1.insert(v1.begin(), 7);
+        ASSERT_EQ(v1[0], 7);
+        v1.insert(v1.begin() + 1, x);
+        ASSERT_EQ(v1[1], x);
+        v1.emplace(v1.begin() + 2, 9);
+        ASSERT_EQ(v1[2], 9);
+        v1.insert(v1.begin(), 2, 8);
+        ASSERT_EQ(v1[0], 8);
+        ASSERT_EQ(v1[1], 8);
+        vector<int>().swap(v1);
+        vector<int> v2{ 1, 2, 3 };
+        v1.insert(v1.begin(), v2.begin(), v2.end());
+        ASSERT_EQ(v1[0], 1);
+        vector<int>().swap(v1);
+        v1.insert(v1.begin(), { 1, 2, 3 });
+        ASSERT_EQ(v1[0], 1);
     }
 }
 

@@ -35,6 +35,14 @@ namespace bitstl
         return first;
     }
 
+    // 从first到last填充元素
+    template<typename ForwardIterator, typename T>
+    void fill(ForwardIterator first, ForwardIterator last, const T& value)
+    {
+        for (; first != last; ++first)
+            *first = value;
+    }
+
     // 将first至last的元素复制到以dest_first开始的内存中
     template<typename InputIterator, typename OutputIterator>
     OutputIterator copy(InputIterator first, InputIterator last, OutputIterator dest_first)

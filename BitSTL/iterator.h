@@ -102,6 +102,7 @@ namespace bitstl
     // 迭代器适配器
     // 可以将普通指针对应的的迭代器转换为类
     // Container用于区分不同容器的相同迭代器类型
+    // TODO 实现拥有可互相转换的不同Iterator类型的iterator_adpater的互相转换，如int*和const int*
     template<typename Iterator, typename Container>
     class iterator_adpater
     {

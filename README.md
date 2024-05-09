@@ -120,14 +120,16 @@ C++标准模板库，使用GoogleTest测试框架。
 9. `vector`参考设计：
 
    - MSVC - `vector` - `_Calculate_growth`，增长因子为1.5。
-   
+
    - GCC - `stl_vector.h`  - ` _M_check_len`，增长因子为2。GCC中`vector`protected继承于`_Vector_base`，将且仅将内存操作放入其中。
-   
+
    - EASTL - `vector.h` - `GetNewCapacity`，增长因子为2。
-   
+
    - MyTinySTL - `vector.h` - `get_new_cap`，增长因子为1.5。
-   
+
    - 《STL源码解析》图4-2使用增长因子为2。
+
+   - `emplace_back`于C++11引入，于C++17新增了返回新插入元素的迭代器的功能。
 
 10. 使用SFINAE的两种写法：
 
